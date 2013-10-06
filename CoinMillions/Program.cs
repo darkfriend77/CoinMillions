@@ -19,12 +19,12 @@ namespace CoinMillions
             //{
             //}
 
-            BaseBtcConnector btc = new BaseBtcConnector();
+            BitcoinQtConnector btc = new BitcoinQtConnector();
 
-            Console.WriteLine("GetInfo: {0}", btc.GetInfo());
+            //Console.WriteLine("GetInfo: {0}", btc.GetInfo());
             //Console.WriteLine("ListReceivedByAddress: {0}", btc.ListReceivedByAddress());
 
-            InWalletTransaction inWalletTransaction = btc.GetAllInWalletTransactions().Last();
+            //Transaction transaction = btc.ListTransactions().Last();
 
             //BitcoinWrapper.Data.Transaction transaction = btc.DecodeRawTransaction(btc.GetRawTransaction(inWalletTransaction.TxId));
 
@@ -39,7 +39,86 @@ namespace CoinMillions
             //Console.WriteLine("Transaction: {0}", transaction.vin);
             //Console.WriteLine("Transaction: {0}", transaction.vout);
 
-            JObject rawTransaction = btc.GetDecodedRawTransaction(inWalletTransaction.TxId);
+            //JObject rawTransaction = btc.GetDecodedRawTransaction("c878e369de3d5021c6cc6ca5de9b13831b59876f9781f1320b6cbd5b00c970e0");
+
+
+
+
+
+
+
+
+
+
+            //JObject list = btc.ListAccounts1();
+            //foreach(JToken token in list.GetValue("result"))
+            //{
+            //    string account = token.ToString().Split(':')[0].Replace("\"", "");
+            //    List<JToken> tokens = btc.GetAddressesByAccount(account);
+            //    string adress = string.Empty;
+            //    if (tokens.Count > 0)
+            //        adress = tokens[0].ToString();
+
+            //    Console.WriteLine("'{0}', '{1}'", account, adress);
+            //}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            //List<Transaction> listTransactions = btc.ListTransactionsByCategory();
+            //foreach (Transaction trans in listTransactions)
+            //{
+            //    Console.WriteLine("- Transaction[{0}]", listTransactions.IndexOf(trans));
+            //    Console.WriteLine("  + Transaction(TxId): {0}", "");
+            //    Console.WriteLine("  + Transaction(Amount): {0}", trans.Amount);
+            //    Console.WriteLine("  + Transaction(TimeReceived): {0}", trans.TimeReceived);
+            //    Console.WriteLine("  + Transaction(Time): {0}", trans.Time);
+            //    Console.WriteLine("  + Transaction(fee): {0}", trans.Fee);
+            //    foreach (Detail detail in trans.Details)
+            //    {
+            //        Console.WriteLine("  + Details[{0}]", trans.Details.IndexOf(detail));
+            //        Console.WriteLine("    + Account: {0}", detail.Account);
+            //        Console.WriteLine("    + Address: {0}", detail.Address);
+            //        Console.WriteLine("    + Amount: {0}", detail.Amount);
+            //        Console.WriteLine("    + Category: {0}", detail.Category);
+            //    }
+            //    Console.WriteLine("  + RawTransaction: {0}", trans.RawTransaction);
+            //}
+
+
+
+
+
+
+            string rawTrans = btc.CreateZeroConfirmationTransaction("8d6c45ee8b603900f351ec5dcfca89398195ad589a6d68339eb18865b5687132", 0.01, 0.0001);
+
+
+
+            Console.WriteLine(btc.DecodeRawTransactionString(rawTrans));
+
+
+            SignedRawTransaction signrawtransaction = btc.SignRawTransaction(rawTrans);
+
+            Console.WriteLine("signrawtransaction.Complete: {0}", signrawtransaction.Complete);
+            Console.WriteLine("signrawtransaction.Hex: {0}", signrawtransaction.Hex);
+
+            string result = btc.SendRawTransaction(signrawtransaction.Hex);
+
+            Console.WriteLine("result: {0}", result);
+
+            //Console.WriteLine("GetAddressesByAccount: {0}", btc.GetAddressesByAccount(""));
 
             //Console.WriteLine("Raw Transaction: {0}", rawTransaction.ToString());
 
@@ -47,8 +126,7 @@ namespace CoinMillions
             //if (rawTransaction.TryGetValue("result", out token))
             //    Console.WriteLine("token: {0}", token.ToString());
 
-            //Console.WriteLine("result: {0}", rawTransaction["result"]["vout"]["value"].ToString());
-            Console.WriteLine("vout: {0}", rawTransaction["result"]["vout"].ToString());
+            //Console.WriteLine("rawTransaction: {0}", rawTransaction["result"].ToString());
 
 
 //Yeah it works

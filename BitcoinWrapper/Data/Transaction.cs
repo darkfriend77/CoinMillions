@@ -8,40 +8,24 @@ namespace BitcoinWrapper.Data
 {
     public class Transaction
     {
+        public float Amount { get; set; }
+        public int Confirmations { get; set; }
+        public string Blockhash { get; set; }
+        public int BlockIndex { get; set; }
+        public int BlockTime { get; set; }
         public string TxId { get; set; }
-        public int Version { get; set; }
-        public int LockTime { get; set; }
-        public List<vout> vout { get; set; }
-        public List<vin> vin { get; set; }
-
-        public Transaction()
-        {
-            
-        }
-
-
+        public int Time { get; set; }
+        public int TimeReceived { get; set; }
+        public double? Fee { get; set; }
+        public List<Detail> Details { get; set; }
+        public RawTransaction RawTransaction { get; set; }
     }
 
-    public class vout
+    public class Detail
     {
-        public float value { get; set; }
-        public int n { get; set; }
-        public scriptPubKey ScriptPubKey { get; set; }
-    }
-
-    public class vin
-    {
-        public string CoinBase { get; set; }
-        public string Sequence { get; set; }
-           
-    }
-
-    public class scriptPubKey
-    {
-        public string asm { get; set; }
-        public string hex { get; set; }
-        public string reqSigs { get; set; }
-        public string type { get; set; }
-        public List<string> addresses { get; set; }
+        public string Account { get; set; }
+        public string Address { get; set; }
+        public string Category { get; set; }
+        public float Amount { get; set; }
     }
 }

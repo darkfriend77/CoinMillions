@@ -48,14 +48,16 @@
   <ItemGroup>
     <Compile Include="Common\Constants.cs" />
     <Compile Include="Common\NodeAction.cs" />
+    <Compile Include="Data\Account.cs" />
+    <Compile Include="Data\Adress.cs" />
     <Compile Include="Data\Block.cs" />
-    <Compile Include="Data\InWalletTransaction.cs" />
-    <Compile Include="Data\MethodName.cs" />
+    <Compile Include="Data\Info.cs" />
     <Compile Include="Data\Transaction.cs" />
+    <Compile Include="Data\MethodName.cs" />
+    <Compile Include="Data\RawTransaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Wrapper\BaseConnector.cs" />
     <Compile Include="Wrapper\BaseBtcConnector.cs" />
-    <Compile Include="Wrapper\BitcoinService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

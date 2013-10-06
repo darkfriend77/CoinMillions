@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinMillions", "CoinMillion
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinWrapper", "BitcoinWrapper\BitcoinWrapper.csproj", "{B853E315-7103-4CBA-8873-D5202019F267}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinMillionsServer", "CoinMillionsServer\CoinMillionsServer.csproj", "{B805BC50-B3EE-42AF-9E1C-D235A7AB46EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{B853E315-7103-4CBA-8873-D5202019F267}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B853E315-7103-4CBA-8873-D5202019F267}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B853E315-7103-4CBA-8873-D5202019F267}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B805BC50-B3EE-42AF-9E1C-D235A7AB46EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B805BC50-B3EE-42AF-9E1C-D235A7AB46EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B805BC50-B3EE-42AF-9E1C-D235A7AB46EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B805BC50-B3EE-42AF-9E1C-D235A7AB46EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

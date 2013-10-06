@@ -22,17 +22,11 @@ namespace BitcoinWrapper.Wrapper
         public BaseConnector()
         {
             if (string.IsNullOrEmpty(serverIp))
-            {
                 throw new ArgumentException("You have to add a server IP setting with key: serverip");
-            }
             if (string.IsNullOrEmpty(username))
-            {
                 throw new ArgumentException("You have to add a bitcoin qt username setting with key: username");
-            }
             if (string.IsNullOrEmpty(password))
-            {
                 throw new ArgumentException("You have to add a bitcoin qt password setting with key: password");
-            }
         }
 
         public JObject RequestServer(MethodName methodName)
@@ -79,22 +73,18 @@ namespace BitcoinWrapper.Wrapper
                 dataStream.Write(byteArray, 0, byteArray.Length);
                 dataStream.Close();
 
-
                 WebResponse webResponse = rawRequest.GetResponse();
 
                 streamReader = new StreamReader(webResponse.GetResponseStream(), true);
 
                 return (JObject)JsonConvert.DeserializeObject(streamReader.ReadToEnd());
             }
+
             finally
             {
                 if (streamReader != null)
-                {
                     streamReader.Close();
-                }
-
             }
-            return null;
         }
 
         private HttpWebRequest GetRawRequest()

@@ -19,7 +19,7 @@ namespace BitcoinWrapper.Data
         //lockunspent unlock? [array-of-Objects]
         //sendmany <fromaccount> {address:amount,...} [minconf=1] [comment]
         //setaccount <bitcoinaddress> <account>
-        //signrawtransaction <hex string> [{"txid":txid,"vout":n,"scriptPubKey":hex,"redeemScript":hex},...] [<privatekey1>,...] [sighashtype="ALL"]
+        signrawtransaction, //<hex string> [{"txid":txid,"vout":n,"scriptPubKey":hex,"redeemScript":hex},...] [<privatekey1>,...] [sighashtype="ALL"]
         //verifymessage <bitcoinaddress> <signature> <message>
 
         getbalance,
