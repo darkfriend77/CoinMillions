@@ -1,0 +1,83 @@
+
+-- --------------------------------------------------
+-- Entity Designer DDL Script for SQL Server Compact Edition
+-- --------------------------------------------------
+-- Date Created: 10/13/2013 14:09:30
+-- Generated from EDMX file: D:\Bitcoin\Projects\CoinMillions\CoinMillionsServer\CoinMillionsModel.edmx
+-- --------------------------------------------------
+
+
+-- --------------------------------------------------
+-- Dropping existing FOREIGN KEY constraints
+-- NOTE: if the constraint does not exist, an ignorable error will be reported.
+-- --------------------------------------------------
+
+
+-- --------------------------------------------------
+-- Dropping existing tables
+-- NOTE: if the table does not exist, an ignorable error will be reported.
+-- --------------------------------------------------
+
+    DROP TABLE [TicketTxes];
+GO
+
+-- --------------------------------------------------
+-- Creating all tables
+-- --------------------------------------------------
+
+-- Creating table 'TicketTxes'
+CREATE TABLE [TicketTxes] (
+    [ID] int IDENTITY(1,1) NOT NULL,
+    [TxId] nvarchar(4000)  NOT NULL,
+    [Amount] float  NOT NULL,
+    [Sender] nvarchar(4000)  NOT NULL
+);
+GO
+
+-- Creating table 'ChangeTxes'
+CREATE TABLE [ChangeTxes] (
+    [ID] int IDENTITY(1,1) NOT NULL,
+    [TxId] nvarchar(4000)  NOT NULL,
+    [Amount] float  NOT NULL,
+    [Validation] bit  NOT NULL,
+    [TicketTx_ID] int  NOT NULL
+);
+GO
+
+-- --------------------------------------------------
+-- Creating all PRIMARY KEY constraints
+-- --------------------------------------------------
+
+-- Creating primary key on [ID] in table 'TicketTxes'
+ALTER TABLE [TicketTxes]
+ADD CONSTRAINT [PK_TicketTxes]
+    PRIMARY KEY ([ID] );
+GO
+
+-- Creating primary key on [ID] in table 'ChangeTxes'
+ALTER TABLE [ChangeTxes]
+ADD CONSTRAINT [PK_ChangeTxes]
+    PRIMARY KEY ([ID] );
+GO
+
+-- --------------------------------------------------
+-- Creating all FOREIGN KEY constraints
+-- --------------------------------------------------
+
+-- Creating foreign key on [TicketTx_ID] in table 'ChangeTxes'
+ALTER TABLE [ChangeTxes]
+ADD CONSTRAINT [FK_TicketTxChangeTx]
+    FOREIGN KEY ([TicketTx_ID])
+    REFERENCES [TicketTxes]
+        ([ID])
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_TicketTxChangeTx'
+CREATE INDEX [IX_FK_TicketTxChangeTx]
+ON [ChangeTxes]
+    ([TicketTx_ID]);
+GO
+
+-- --------------------------------------------------
+-- Script has ended
+-- --------------------------------------------------

@@ -42,7 +42,7 @@ namespace CoinMillions
             //JObject rawTransaction = btc.GetDecodedRawTransaction("c878e369de3d5021c6cc6ca5de9b13831b59876f9781f1320b6cbd5b00c970e0");
 
 
-
+            //Console.WriteLine(btc.GetTxOut("a5513c35a2ae3ec4ee44822bc75840749834707ebde3ae3cef3dfcfb7c0de6b9", 1));
 
 
 
@@ -102,21 +102,33 @@ namespace CoinMillions
 
 
 
-            string rawTrans = btc.CreateZeroConfirmationTransaction("8d6c45ee8b603900f351ec5dcfca89398195ad589a6d68339eb18865b5687132", 0.01, 0.0001);
+            string rawTrans = btc.CreateZeroConfirmationTransaction("61de00b44ccfda8f9775618f901a490104c2761f33864120d7f053235b6f103b", 0.01, 0.0001);
+
+
+            //Console.WriteLine(btc.DecodeRawTransactionString(rawTrans));
+
+            //SignedRawTransaction signrawtransaction = btc.SignRawTransaction(rawTrans);
+
+            //Console.WriteLine("signrawtransaction.Complete: {0}", signrawtransaction.Complete);
+            //Console.WriteLine("signrawtransaction.Hex: {0}", signrawtransaction.Hex);
+
+            //string result = btc.SendRawTransaction(signrawtransaction.Hex);
+
+            //Console.WriteLine("result: {0}", result);
 
 
 
-            Console.WriteLine(btc.DecodeRawTransactionString(rawTrans));
 
 
-            SignedRawTransaction signrawtransaction = btc.SignRawTransaction(rawTrans);
 
-            Console.WriteLine("signrawtransaction.Complete: {0}", signrawtransaction.Complete);
-            Console.WriteLine("signrawtransaction.Hex: {0}", signrawtransaction.Hex);
 
-            string result = btc.SendRawTransaction(signrawtransaction.Hex);
 
-            Console.WriteLine("result: {0}", result);
+
+
+
+
+
+
 
             //Console.WriteLine("GetAddressesByAccount: {0}", btc.GetAddressesByAccount(""));
 

@@ -12,10 +12,13 @@ namespace BitcoinWrapper.Wrapper
 {
     public class BitcoinQtConnector
     {
+        
+
         public BaseConnector BaseConnector;
 
         /// <summary>
         /// Starts connecting to the Bitcoin-qt server
+        /// https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list
         /// </summary>
         public BitcoinQtConnector()
         {
@@ -439,8 +442,6 @@ namespace BitcoinWrapper.Wrapper
             return result["result"].ToObject<SignedRawTransaction>();
         }
 
-
-
         /// <summary>
         /// 
         /// </summary>
@@ -456,11 +457,23 @@ namespace BitcoinWrapper.Wrapper
                 transaction.RawTransaction = GetRawTransactionObject(transaction.TxId);
             }
 
-            transactions = transactions.Where(t => t.Details.First().Category == category || category == string.Empty || category == null).ToList();
-
-            return transactions;
+            return transactions.Where(t => t.Details.First().Category == category || category == string.Empty || category == null).ToList();
         }
 
+        public bool CreateZeroConfirmationTransaction(string txid, double amountToKeep, double fee, out string rawTransaction)
+        {
+            rawTransaction = string.Empty;
+
+            string changeVoutAdress, payeeVoutAdress;
+            int payeeVoutN;
+            double payeeVoutValue;
+            if (!DeepTransactionInfo(txid, out changeVoutAdress, out payeeVoutAdress, out payeeVoutN, out payeeVoutValue))
+             return false;
+
+            rawTransaction = CreateRawTransaction(txid, payeeVoutN, changeVoutAdress, payeeVoutValue - amountToKeep, payeeVoutAdress, amountToKeep - fee);
+
+            return true;
+        }
 
         public string CreateZeroConfirmationTransaction(string txid, double amountToKeep, double fee)
         {
@@ -516,6 +529,42 @@ namespace BitcoinWrapper.Wrapper
             Console.WriteLine("CreateRawTransaction: {0}", createRawTransaction);
 
             return createRawTransaction;
+        }
+
+        public bool DeepTransactionInfo(string txid, out string changeVoutAdress, out string payeeVoutAdress, out int payeeVoutN, out double payeeVoutValue)
+        {
+            changeVoutAdress = string.Empty;
+            payeeVoutAdress = string.Empty;
+            payeeVoutN = 0;
+            payeeVoutValue = 0;
+            
+            RawTransaction rawTransaction = GetRawTransactionObject(txid);
+            List<Vout> vouts = rawTransaction.Vout;
+            List<Vout> changeVout = new List<Vout>();
+            List<Vout> payeeVout = new List<Vout>();
+
+            foreach (Vout vout in vouts)
+            {
+                if (vout.ScriptPubKey.Addresses.Count != 1)
+                    return false;
+
+                Adress validatedAdress = ValidateAddress(vout.ScriptPubKey.Addresses[0]);
+
+                if (!validatedAdress.IsMine)
+                    changeVout.Add(vout);
+                else
+                    payeeVout.Add(vout);
+            }
+
+            if (changeVout.Count != 1 || payeeVout.Count != 1)
+                return false;
+
+            payeeVoutN = payeeVout[0].N;
+            payeeVoutValue = payeeVout[0].Value;
+            changeVoutAdress = changeVout[0].ScriptPubKey.Addresses[0];
+            payeeVoutAdress = payeeVout[0].ScriptPubKey.Addresses[0];
+
+            return true;
         }
 
     }

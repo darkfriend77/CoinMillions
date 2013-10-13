@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="CoinMillionsModel.Store" Alias="Self" Provider="System.Data.SqlServerCe.4.0" ProviderManifestToken="4.0" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityContainer Name="CoinMillionsModelStoreContainer">
+    <EntitySet Name="TicketTxes" EntityType="CoinMillionsModel.Store.TicketTxes" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="ChangeTxes" EntityType="CoinMillionsModel.Store.ChangeTxes" store:Type="Tables" Schema="dbo" />
+    <AssociationSet Name="TicketTxChangeTx" Association="CoinMillionsModel.Store.TicketTxChangeTx">
+      <End Role="TicketTx" EntitySet="TicketTxes" />
+      <End Role="ChangeTx" EntitySet="ChangeTxes" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="TicketTxes">
+    <Key>
+      <PropertyRef Name="ID" />
+    </Key>
+    <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="TxId" Type="nvarchar" Nullable="false" />
+    <Property Name="Amount" Type="float" Nullable="false" />
+    <Property Name="Sender" Type="nvarchar" Nullable="false" />
+  </EntityType>
+  <EntityType Name="ChangeTxes">
+    <Key>
+      <PropertyRef Name="ID" />
+    </Key>
+    <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="TxId" Type="nvarchar" Nullable="false" />
+    <Property Name="Amount" Type="float" Nullable="false" />
+    <Property Name="Validation" Type="bit" Nullable="false" />
+    <Property Name="TicketTx_ID" Type="int" Nullable="false" />
+  </EntityType>
+  <Association Name="TicketTxChangeTx">
+    <End Role="TicketTx" Type="CoinMillionsModel.Store.TicketTxes" Multiplicity="1" />
+    <End Role="ChangeTx" Type="CoinMillionsModel.Store.ChangeTxes" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="TicketTx">
+        <PropertyRef Name="ID" />
+      </Principal>
+      <Dependent Role="ChangeTx">
+        <PropertyRef Name="TicketTx_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" xmlns:cg="http://schemas.microsoft.com/ado/2006/04/codegeneration" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" Namespace="CoinMillionsModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" annotation:UseStrongSpatialTypes="false">
+        <EntityContainer Name="CoinMillionsModelContainer" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="TicketTxes" EntityType="CoinMillionsModel.TicketTx" />
+          <EntitySet Name="ChangeTxes" EntityType="CoinMillionsModel.ChangeTx" />
+          <AssociationSet Name="TicketTxChangeTx" Association="CoinMillionsModel.TicketTxChangeTx">
+            <End Role="TicketTx" EntitySet="TicketTxes" />
+            <End Role="ChangeTx" EntitySet="ChangeTxes" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="TicketTx">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Type="Int32" Name="ID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="TxId" Nullable="false" />
+          <Property Type="Double" Name="Amount" Nullable="false" />
+          <Property Type="String" Name="Sender" Nullable="false" />
+          <NavigationProperty Name="ChangeTx" Relationship="CoinMillionsModel.TicketTxChangeTx" FromRole="TicketTx" ToRole="ChangeTx" />
+        </EntityType>
+        <EntityType Name="ChangeTx">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Type="Int32" Name="ID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="TicketTx" Relationship="CoinMillionsModel.TicketTxChangeTx" FromRole="ChangeTx" ToRole="TicketTx" />
+          <Property Type="String" Name="TxId" Nullable="false" />
+          <Property Type="Double" Name="Amount" Nullable="false" />
+          <Property Type="Boolean" Name="Validation" Nullable="false" />
+        </EntityType>
+        <Association Name="TicketTxChangeTx">
+          <End Type="CoinMillionsModel.TicketTx" Role="TicketTx" Multiplicity="1" />
+          <End Type="CoinMillionsModel.ChangeTx" Role="ChangeTx" Multiplicity="0..1" />
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+    <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="CoinMillionsModelStoreContainer" CdmEntityContainer="CoinMillionsModelContainer">
+    <EntitySetMapping Name="TicketTxes">
+      <EntityTypeMapping TypeName="IsTypeOf(CoinMillionsModel.TicketTx)">
+        <MappingFragment StoreEntitySet="TicketTxes">
+          <ScalarProperty Name="ID" ColumnName="ID" />
+          <ScalarProperty Name="TxId" ColumnName="TxId" />
+          <ScalarProperty Name="Amount" ColumnName="Amount" />
+          <ScalarProperty Name="Sender" ColumnName="Sender" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="ChangeTxes">
+      <EntityTypeMapping TypeName="IsTypeOf(CoinMillionsModel.ChangeTx)">
+        <MappingFragment StoreEntitySet="ChangeTxes">
+          <ScalarProperty Name="ID" ColumnName="ID" />
+          <ScalarProperty Name="TxId" ColumnName="TxId" />
+          <ScalarProperty Name="Amount" ColumnName="Amount" />
+          <ScalarProperty Name="Validation" ColumnName="Validation" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <AssociationSetMapping Name="TicketTxChangeTx" TypeName="CoinMillionsModel.TicketTxChangeTx" StoreEntitySet="ChangeTxes">
+      <EndProperty Name="TicketTx">
+        <ScalarProperty Name="ID" ColumnName="TicketTx_ID" />
+      </EndProperty>
+      <EndProperty Name="ChangeTx">
+        <ScalarProperty Name="ID" ColumnName="ID" />
+      </EndProperty>
+    </AssociationSetMapping>
+  </EntityContainerMapping>
+</Mapping></edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <edmx:Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </edmx:Connection>
+    <edmx:Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Kein" />
+      </DesignerInfoPropertySet>
+    </edmx:Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
