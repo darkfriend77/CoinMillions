@@ -28,7 +28,7 @@ namespace CoinMillionsServer
 
         private const double ticketCost = 0.01;
         private const double networkFee = 0.0001;
-        private const int updateFrequency = 10;
+        private const int updateFrequency = 100;
 
 
         private int tickCount;
@@ -72,6 +72,7 @@ namespace CoinMillionsServer
 
         private void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
         {
+            progressBar1.Foreground = Brushes.Red;
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 0;
@@ -79,23 +80,37 @@ namespace CoinMillionsServer
             tickCount = 0;
 
             timer = new DispatcherTimer();
-            timer.Interval = new TimeSpan(0, 0, 0, 1, 0);
+            timer.Interval = new TimeSpan(0, 0, 0, 0, 500);
             timer.Tick += TimerOnTick;
             timer.IsEnabled = true;
         }
 
         private void TimerOnTick(object sender, EventArgs eventArgs)
         {
-            lblTicks.Content = tickCount;
+            lblStatus.Content = string.Format("waiting");
 
-            progressBar1.Value = tickCount * updateFrequency;
+            progressBar1.Value = tickCount;
 
-            if (tickCount++ % updateFrequency > 0)
+            Info info = btc.GetInfo();
+            lblActBlock.Content = info.Blocks;
+            lblDifficulty.Content = info.Difficulty;
+            lblGenTicket.Content = numbAlgo.getArrayToString(numbAlgo.getTicketFromHash(btc.GetBlockhash(info.Blocks)));
+
+            if (tickCount++ % (updateFrequency + 1) > 0)
                 return;
+
+            progressBar1.Foreground = Brushes.Green;
 
             tickCount %= updateFrequency;
             progressBar1.Value = 0;
 
+            keepAnEyeOnWallet();
+
+            progressBar1.Foreground = Brushes.Red;
+        }
+
+        private void keepAnEyeOnWallet()
+        {
             List<Transaction> allTransactions = btc.ListTransactionsByCategory();
             //AddLine("alltransactions: {0}", btc.ListTransactions());
 
@@ -112,6 +127,8 @@ namespace CoinMillionsServer
             // do new change transactions
             makeChangeTxs();
 
+            lblTicketCount.Content = database.TicketTxes.Count();
+            lblAmount.Content = btc.GetBalance();
         }
 
         /// <summary>
@@ -120,7 +137,7 @@ namespace CoinMillionsServer
         /// <param name="allTransactions"></param>
         private void getChangeTxs(List<Transaction> allTransactions)
         {
-            AddLine("getChangeTxs[{0}]: starting ...!", allTransactions.Count);
+            lblStatus.Content = string.Format("getChangeTxs[{0}]", allTransactions.Count);
 
             foreach (Transaction transaction in allTransactions)
             {
@@ -154,7 +171,6 @@ namespace CoinMillionsServer
 
             }
 
-            AddLine("getChangeTxs[{0}]: finished ...!", allTransactions.Count);
         }
 
         /// <summary>
@@ -186,6 +202,7 @@ namespace CoinMillionsServer
         /// </summary>
         private void makeChangeTxs()
         {
+            lblStatus.Content = string.Format("makeChangeTxs");
 
             foreach (TicketTx ticketTx in database.TicketTxes.Where(t => t.ChangeTx == null))
             {
@@ -219,7 +236,7 @@ namespace CoinMillionsServer
         /// <param name="allTransactions"></param>
         private void getTicketTxs(List<Transaction> allTransactions)
         {
-            AddLine("getTicketTxs[{0}]: starting ...!", allTransactions.Count);
+            lblStatus.Content = string.Format("getTicketTxs[{0}]", allTransactions.Count);
 
             foreach (Transaction transaction in allTransactions)
             {
@@ -246,8 +263,6 @@ namespace CoinMillionsServer
                 //else
                 //    AddLine("Invalid Ticket: {0}, Duplicate: {1}", transaction.TxId, duplicate);
             }
-
-            AddLine("getTicketTxs[{0}]: finished ...!", allTransactions.Count);
         }
 
         private bool isValidTicketTx(Transaction transaction)
@@ -278,6 +293,17 @@ namespace CoinMillionsServer
 
             //return the total seconds (which is a UNIX timestamp)
             return span.TotalSeconds;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            foreach(TicketTx ticketTx in database.TicketTxes)
+            {
+                int[] personalTicket = numbAlgo.getTicketFromValue(ticketTx.Amount);
+                int[] randomTicket = numbAlgo.getTicketFromHash(ticketTx.TxId);
+                int splitHashLenght = numbAlgo.getSplitHashLenght(ticketTx.TxId);
+                AddLine("TicketTx[{0}] Pers.: {1} Rand.: {2} [{3}]", ticketTx.ID, numbAlgo.getArrayToString(personalTicket), numbAlgo.getArrayToString(randomTicket), splitHashLenght);
+            }
         }
 
     }

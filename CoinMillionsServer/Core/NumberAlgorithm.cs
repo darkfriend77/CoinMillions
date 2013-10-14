@@ -15,15 +15,23 @@ namespace CoinMillions.Core
             generateNumbers();
         }
 
+        public int getSplitHashLenght(string hash)
+        {
+            return int.Parse(hash.Substring(0, 4), System.Globalization.NumberStyles.HexNumber) % 5;
+        }
+
         public int[] getTicketFromHash(string hash)
         {
             int[] result;
             ulong nummer = 0;
             string splitHash = "";
+
+            int splitHashLenght = getSplitHashLenght(hash);
+
             foreach (char t in hash)
             {
                 splitHash += t;
-                if (splitHash.Length > 15)
+                if (splitHash.Length > (11 + splitHashLenght))
                 {
                     nummer += ulong.Parse(splitHash, System.Globalization.NumberStyles.HexNumber);
                     splitHash = "";

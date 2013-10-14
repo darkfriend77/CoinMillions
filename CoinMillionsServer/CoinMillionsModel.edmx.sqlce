@@ -2,8 +2,8 @@
 -- --------------------------------------------------
 -- Entity Designer DDL Script for SQL Server Compact Edition
 -- --------------------------------------------------
--- Date Created: 10/13/2013 14:09:30
--- Generated from EDMX file: D:\Bitcoin\Projects\CoinMillions\CoinMillionsServer\CoinMillionsModel.edmx
+-- Date Created: 10/14/2013 10:00:59
+-- Generated from EDMX file: C:\Bitcoin\Projects\CoinMillions\CoinMillionsServer\CoinMillionsModel.edmx
 -- --------------------------------------------------
 
 
@@ -12,6 +12,8 @@
 -- NOTE: if the constraint does not exist, an ignorable error will be reported.
 -- --------------------------------------------------
 
+    ALTER TABLE [ChangeTxes] DROP CONSTRAINT [FK_TicketTxChangeTx];
+GO
 
 -- --------------------------------------------------
 -- Dropping existing tables
@@ -19,6 +21,8 @@
 -- --------------------------------------------------
 
     DROP TABLE [TicketTxes];
+GO
+    DROP TABLE [ChangeTxes];
 GO
 
 -- --------------------------------------------------

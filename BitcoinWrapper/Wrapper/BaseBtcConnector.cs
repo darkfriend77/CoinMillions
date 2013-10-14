@@ -192,14 +192,12 @@ namespace BitcoinWrapper.Wrapper
 
         public string Help()
         {
-            var rawTransaction = BaseConnector.RequestServer(MethodName.help)["result"].ToString();
-            return rawTransaction;
+            return BaseConnector.RequestServer(MethodName.help)["result"].ToString();
         }
 
         public string ListAccounts()
         {
-            var rawTransaction = BaseConnector.RequestServer(MethodName.listaccounts)["result"].ToString();
-            return rawTransaction;
+            return BaseConnector.RequestServer(MethodName.listaccounts)["result"].ToString();
         }
 
         public JObject ListAccounts1()
@@ -209,8 +207,7 @@ namespace BitcoinWrapper.Wrapper
 
         public string ListAddressGroupings()
         {
-            var rawTransaction = BaseConnector.RequestServer(MethodName.listaddressgroupings)["result"].ToString();
-            return rawTransaction;
+            return BaseConnector.RequestServer(MethodName.listaddressgroupings)["result"].ToString();
         }
 
         public string ListReceivedByAccount()
@@ -243,6 +240,11 @@ namespace BitcoinWrapper.Wrapper
         public string ListTransactions()
         {
             return BaseConnector.RequestServer(MethodName.listtransactions)["result"].ToString();
+        }
+
+        public string ListTransactions(string account, int count, int from)
+        {
+            return BaseConnector.RequestServer(MethodName.listtransactions, new List<object>() {account, count, from})["result"].ToString();
         }
 
         public string ListLockUnspent()
@@ -447,9 +449,9 @@ namespace BitcoinWrapper.Wrapper
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
-        public List<Transaction> ListTransactionsByCategory(string category = null)
+        public List<Transaction> ListTransactionsByCategory(string account="", int count=999999, int from=0, string category = null)
         {
-            List<Transaction> transactions = BaseConnector.RequestServer(MethodName.listtransactions)["result"].ToObject<List<Transaction>>();
+            List<Transaction> transactions = BaseConnector.RequestServer(MethodName.listtransactions, new List<object>() { account, count, from})["result"].ToObject<List<Transaction>>();
 
             foreach (Transaction transaction in transactions)
             {

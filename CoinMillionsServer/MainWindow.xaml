@@ -1,13 +1,25 @@
 ﻿<Window x:Class="CoinMillionsServer.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="750">
+        Title="CoinMillions" Height="400" Width="750" Background="#FF4F4F4F" Foreground="Black">
     <Grid>
         <RichTextBox x:Name="outputBox"
                      VerticalScrollBarVisibility="Visible" 
                      HorizontalScrollBarVisibility="Visible" 
-                     IsReadOnly="True" Margin="0,180,0,0" Padding="0" FontFamily="Lucida Console" FontSize="10"/>
-        <ProgressBar x:Name="progressBar1" Height="40" Margin="0,0,0,0" Padding="0" Width="700"/>
-        <Label x:Name="lblTicks" Content="" HorizontalAlignment="Left" Margin="258,91,0,0" VerticalAlignment="Top"/>
+                     IsReadOnly="True" Margin="0,200,0,0" Padding="0" FontFamily="Lucida Console" FontSize="10" Grid.ColumnSpan="3" Width="750"/>
+        <ProgressBar x:Name="progressBar1" Height="40" Margin="0,155,0,170" Padding="0" Width="750"/>
+        <Label Content="Tickets:" HorizontalAlignment="Left" Margin="21,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.404,-0.993" Foreground="White"/>
+        <Label x:Name="lblTicketCount" Content="0" HorizontalAlignment="Left" Margin="100,10,0,0" VerticalAlignment="Top" Foreground="Lime"/>
+        <Label x:Name="lblAmount" Content="0" HorizontalAlignment="Left" Margin="100,36,0,0" VerticalAlignment="Top" Foreground="Lime"/>
+        <Label Content="Amount:" HorizontalAlignment="Left" Margin="21,36,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label Content="Status:" HorizontalAlignment="Left" Margin="253,114,0,0" VerticalAlignment="Top" Foreground="Yellow" FontWeight="Bold"/>
+        <Label x:Name="lblStatus" Content="none" HorizontalAlignment="Left" Margin="303,114,0,0" VerticalAlignment="Top" Width="70" Foreground="Lime" FontWeight="Bold"/>
+        <Label Content="Blocks:" HorizontalAlignment="Left" Margin="21,62,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.763,0.192" Foreground="White"/>
+        <Label Content="Difficulty:" HorizontalAlignment="Left" Margin="21,88,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.342,-0.423" Foreground="White"/>
+        <Label Content="Gen.Ticket:" HorizontalAlignment="Left" Margin="21,114,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label x:Name="lblActBlock" Content="0" HorizontalAlignment="Left" Margin="100,62,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.421,-0.115" Foreground="Lime"/>
+        <Label x:Name="lblDifficulty" Content="0" HorizontalAlignment="Left" Margin="100,88,0,0" VerticalAlignment="Top" Foreground="Lime"/>
+        <Label x:Name="lblGenTicket" Content="0" HorizontalAlignment="Left" Margin="100,114,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.711,1.885" Foreground="Lime"/>
+        <Button Content="Tickets" HorizontalAlignment="Left" Margin="667,130,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.72,-3.727" Click="Button_Click"/>
     </Grid>
 </Window>
