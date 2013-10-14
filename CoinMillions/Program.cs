@@ -102,7 +102,7 @@ namespace CoinMillions
 
 
 
-            string rawTrans = btc.CreateZeroConfirmationTransaction("61de00b44ccfda8f9775618f901a490104c2761f33864120d7f053235b6f103b", 0.01, 0.0001);
+            //string rawTrans = btc.CreateZeroConfirmationTransaction("61de00b44ccfda8f9775618f901a490104c2761f33864120d7f053235b6f103b", 0.01, 0.0001);
 
 
             //Console.WriteLine(btc.DecodeRawTransactionString(rawTrans));

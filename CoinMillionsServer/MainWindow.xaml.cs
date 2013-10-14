@@ -111,7 +111,7 @@ namespace CoinMillionsServer
 
         private void keepAnEyeOnWallet()
         {
-            List<Transaction> allTransactions = btc.ListTransactionsByCategory();
+            List<TransactionDetail> allTransactions = btc.ListTransactions("",999999,0);
             //AddLine("alltransactions: {0}", btc.ListTransactions());
 
             //timer.IsEnabled = false;
@@ -135,13 +135,12 @@ namespace CoinMillionsServer
         /// 
         /// </summary>
         /// <param name="allTransactions"></param>
-        private void getChangeTxs(List<Transaction> allTransactions)
+        private void getChangeTxs(List<TransactionDetail> allTransactions)
         {
             lblStatus.Content = string.Format("getChangeTxs[{0}]", allTransactions.Count);
 
-            foreach (Transaction transaction in allTransactions)
+            foreach (TransactionDetail transaction in allTransactions)
             {
-                progressBar1.Value += 1;
 
                 if (isValidChangeTx(transaction))
                 {
@@ -154,6 +153,7 @@ namespace CoinMillionsServer
                         ticketTx.ChangeTx = new ChangeTx()
                         {
                             TxId = transaction.TxId,
+                            Amount = transaction.Amount,
                             Validation = false,
                             TicketTx = ticketTx
                         };
@@ -178,14 +178,18 @@ namespace CoinMillionsServer
         /// </summary>
         /// <param name="transaction"></param>
         /// <returns></returns>
-        private bool isValidChangeTx(Transaction transaction)
+        private bool isValidChangeTx(TransactionDetail transaction)
         {
             // amount check
             if (transaction.Amount >= ticketCost)
                 return false;
 
             // category check
-            if (transaction.Details[0].Category != "send")
+            if (transaction.Category != "send")
+                return false;
+
+            // adress check
+            if (btc.ValidateAddress(transaction.Address).IsMine)
                 return false;
 
             // check if it's linked to a ticket transaction
@@ -234,14 +238,12 @@ namespace CoinMillionsServer
         /// 
         /// </summary>
         /// <param name="allTransactions"></param>
-        private void getTicketTxs(List<Transaction> allTransactions)
+        private void getTicketTxs(List<TransactionDetail> allTransactions)
         {
             lblStatus.Content = string.Format("getTicketTxs[{0}]", allTransactions.Count);
 
-            foreach (Transaction transaction in allTransactions)
+            foreach (TransactionDetail transaction in allTransactions)
             {
-                progressBar1.Value += 1;
-
                 string changeVoutAdress, payeeVoutAdress;
                 int payeeVoutN;
                 double payeeVoutValue;
@@ -265,14 +267,18 @@ namespace CoinMillionsServer
             }
         }
 
-        private bool isValidTicketTx(Transaction transaction)
+        private bool isValidTicketTx(TransactionDetail transaction)
         {
             // amount check
             if (transaction.Amount < ticketCost || transaction.Amount >= (ticketCost * 2))
                 return false;
 
             // category check
-            if (transaction.Details[0].Category != "receive")
+            if (transaction.Category != "receive")
+                return false;
+            
+            // adress check
+            if (!btc.ValidateAddress(transaction.Address).IsMine)
                 return false;
 
             return true;

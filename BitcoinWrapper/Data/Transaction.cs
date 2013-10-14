@@ -10,15 +10,29 @@ namespace BitcoinWrapper.Data
     {
         public float Amount { get; set; }
         public int Confirmations { get; set; }
-        public string Blockhash { get; set; }
+        public string BlockHash { get; set; }
         public int BlockIndex { get; set; }
         public int BlockTime { get; set; }
         public string TxId { get; set; }
         public int Time { get; set; }
         public int TimeReceived { get; set; }
-        public double? Fee { get; set; }
         public List<Detail> Details { get; set; }
-        public RawTransaction RawTransaction { get; set; }
+    }
+
+    public class TransactionDetail
+    {
+        public string Account { get; set; }
+        public string Address { get; set; }
+        public string Category { get; set; }
+        public double Amount { get; set; }
+        public int Confirmations { get; set; }
+        public string BlockHash { get; set; }
+        public int BlockIndex { get; set; }
+        public int BlockTime { get; set; }
+        public string TxId { get; set; }
+        public int Time { get; set; }
+        public int TimeReceived { get; set; }
+        public double? fee { get; set; }
     }
 
     public class Detail
