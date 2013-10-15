@@ -92,6 +92,26 @@ namespace CoinMillions.Core
             return tempResult;
         }
 
+        public static double factorial(double n, int x = 1)
+        {
+            if (n > x)
+                return n * factorial(n - 1, x);
+            return n;
+        }
+
+        public static double binominal(double n, double k)
+        {
+            double tmp0, tmp1;
+            if ((k == 0) || (n == k))
+                return 1;
+            else
+            {
+                tmp0 = binominal(n - 1, k);     // hier ist die rekursion ;)
+                tmp1 = binominal(n - 1, k - 1); // und hier
+                return tmp0 + tmp1;
+            }
+        }
+
         public string getArrayToString(int[] array)
         {
             string result = "[ ";
@@ -99,6 +119,60 @@ namespace CoinMillions.Core
                 result += element + " ";
             result += "]";
             return result;
+        }
+
+        public void check()
+        {
+            int numbers = 5;
+            int maxnumbers = 22;
+            int stars = 2;
+            int maxstars = 9;
+
+            double totalPercentage = 0;
+
+            double gain = 100;
+            double totalGain = 0;
+
+
+            Console.WriteLine("Combinations {0} !", factorial(maxnumbers, maxnumbers - numbers + 1) / factorial(numbers) * factorial(maxstars, maxstars - stars + 1) / factorial(stars));
+            Console.WriteLine("POT {0} BTC", gain);
+
+            double raiser = 1;
+
+            for (int n = 5; n >= 0; n--)
+            {
+                double gainAllocate = (gain * (n)) / (n + raiser);
+                gain -= gainAllocate;
+
+                for (int s = 2; s >= 0; s--)
+                {
+                    double gainStepAllocate = (gainAllocate * (s + 2)) / (s + raiser + 2);
+                    gainAllocate -= gainStepAllocate;
+                    totalGain += gainStepAllocate;
+
+                    raiser += 2;
+
+                    double percentageNumbers = binominal(numbers, n) * binominal(maxnumbers - numbers, numbers - n) / binominal(maxnumbers, numbers);
+                    double percentageStars = binominal(stars, s) * binominal(maxstars - stars, stars - s) / binominal(maxstars, stars);
+
+                    double percentage = percentageNumbers * percentageStars;
+
+                    totalPercentage += percentage;
+
+                    string percentageString = String.Format("{0,10:0.00000}", (percentage * 100));
+
+                    if (s > 0)
+                        Console.WriteLine("{0} + {1} = {2} % - {3}", n, s, percentageString, String.Format("{0,15:0.00000000}", gainStepAllocate));
+                    else
+                        Console.WriteLine("{0}     = {1} % - {2}", n, percentageString, String.Format("{0,15:0.00000000}", gainStepAllocate));
+
+                }
+            }
+
+            Console.WriteLine("TOTAL: ALL   = {0} %", totalPercentage * 100);
+            Console.WriteLine("TOTAL: GAIN  = {0} BTC", totalGain);
+
+            Console.ReadKey();
         }
 
     }
