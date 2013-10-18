@@ -13,9 +13,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using BitcoinWrapper.Data;
-using BitcoinWrapper.Wrapper;
-using CoinMillions.Core;
+using CoinMillionsServer.Common;
+using CoinMillionsServer.Core;
+using CoinMillionsServer.Data;
+using CoinMillionsServer.Wrapper;
 using Newtonsoft.Json.Linq;
 
 namespace CoinMillionsServer
@@ -37,11 +38,14 @@ namespace CoinMillionsServer
         private DispatcherTimer timer;
 
         private BitcoinQtConnector btc;
-        private NumberAlgorithm numbAlgo;
+        private Lottery lottery;
 
         private CoinMillionsModelContainer database;
 
+        private bool buildChangeTxFlag;
 
+        private Info actualInfo;
+        private int[] actualDraw;
 
         public MainWindow()
         {
@@ -52,12 +56,10 @@ namespace CoinMillionsServer
             this.startTime = ConvertToTimestamp(new DateTime(2013, 10, 1, 23, 0, 0, 0));
 
             // initialize
-            this.numbAlgo = new NumberAlgorithm();
             this.btc = new BitcoinQtConnector();
-
+            this.lottery = new Lottery(database);
 
             Loaded += OnLoaded;
-
 
             DoThingsNow();
         }
@@ -72,6 +74,8 @@ namespace CoinMillionsServer
 
         private void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
         {
+            buildChangeTxFlag = (bool)chBxChangeTx.IsChecked;
+
             progressBar1.Foreground = Brushes.Red;
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
@@ -91,10 +95,13 @@ namespace CoinMillionsServer
 
             progressBar1.Value = tickCount;
 
-            Info info = btc.GetInfo();
-            lblActBlock.Content = info.Blocks;
-            lblDifficulty.Content = info.Difficulty;
-            lblGenTicket.Content = numbAlgo.getArrayToString(numbAlgo.getTicketFromHash(btc.GetBlockhash(info.Blocks)));
+            // actualize network informations for the tick
+            actualInfo = btc.GetInfo();
+            actualDraw = lottery.getTicketFromHash(btc.GetBlockhash(actualInfo.Blocks));
+
+            lblActBlock.Content = actualInfo.Blocks.ToString("N0") + " [" + (2016 - (actualInfo.Blocks % 2016)) + "]";
+            lblDifficulty.Content = actualInfo.Difficulty.ToString("N0");
+            lblGenTicket.Content = lottery.getArrayToString(actualDraw);
 
             if (tickCount++ % (updateFrequency + 1) > 0)
                 return;
@@ -102,16 +109,18 @@ namespace CoinMillionsServer
             progressBar1.Foreground = Brushes.Green;
 
             tickCount %= updateFrequency;
-            progressBar1.Value = 0;
 
+            // check wallet for new tickets and stuff
             keepAnEyeOnWallet();
 
-            progressBar1.Foreground = Brushes.Red;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void keepAnEyeOnWallet()
         {
-            List<TransactionDetail> allTransactions = btc.ListTransactions("",999999,0);
+            List<TransactionDetail> allTransactions = btc.ListTransactions("", 999999, 0);
             //AddLine("alltransactions: {0}", btc.ListTransactions());
 
             //timer.IsEnabled = false;
@@ -125,9 +134,12 @@ namespace CoinMillionsServer
             getChangeTxs(allTransactions);
 
             // do new change transactions
-            makeChangeTxs();
+            if (buildChangeTxFlag)
+                makeChangeTxs();
 
-            lblTicketCount.Content = database.TicketTxes.Count();
+            lblTicketsCount.Content = database.TransactionDetails.OfType<TicketTx>().Count();
+            lblChangesCount.Content = string.Format("{0} [{1}]", database.TransactionDetails.OfType<ChangeTx>().Where(t => t.Validation == true).Count(), database.TransactionDetails.OfType<ChangeTx>().Count());
+            lblBlocksCount.Content = database.Blocks.Count();
             lblAmount.Content = btc.GetBalance();
         }
 
@@ -141,36 +153,52 @@ namespace CoinMillionsServer
 
             foreach (TransactionDetail transaction in allTransactions)
             {
-
                 if (isValidChangeTx(transaction))
                 {
-                    ChangeTx changeTx = database.ChangeTxes.Where(t => t.TxId == transaction.TxId).FirstOrDefault();
+                    ChangeTx changeTx = database.TransactionDetails.OfType<ChangeTx>().Where(t => t.TxId == transaction.TxId).FirstOrDefault();
+
                     if (changeTx == null)
                     {
+                        changeTx = new ChangeTx()
+                        {
+                            Account = transaction.Account,
+                            Address = transaction.Address,
+                            Amount = transaction.Amount,
+                            BlockHash = transaction.BlockHash,
+                            BlockIndex = transaction.BlockIndex,
+                            BlockTime = transaction.BlockTime,
+                            Category = transaction.Category,
+                            Confirmations = 0,
+                            Fee = transaction.Fee,
+                            Time = transaction.Time,
+                            TimeReceived = transaction.TimeReceived,
+                            TxId = transaction.TxId,
+                            Validation = false
+                        };
+
                         RawTransaction rawtransaction = btc.GetRawTransactionObject(transaction.TxId);
                         string rawtransactionTxId = rawtransaction.Vin[0].TxId;
-                        TicketTx ticketTx = database.TicketTxes.Where(t => t.TxId == rawtransactionTxId).First();
-                        ticketTx.ChangeTx = new ChangeTx()
-                        {
-                            TxId = transaction.TxId,
-                            Amount = transaction.Amount,
-                            Validation = false,
-                            TicketTx = ticketTx
-                        };
+                        TicketTx ticketTx = database.TransactionDetails.OfType<TicketTx>().Where(t => t.TxId == rawtransactionTxId).First();
+
+                        ticketTx.ChangeTx = changeTx;
                         database.SaveChanges();
                         AddLine("ChangeTx[{0}]: Found new changeTx!", transaction.TxId);
 
+
                     }
-                    else if (!changeTx.Validation)
+                    else if (!changeTx.Validation && transaction.Confirmations > 0)
                     {
+                        // fill the missing values ...
+                        Block block = btc.GetBlock(transaction.BlockHash);
+                        changeTx.Blocks = block;
+                        changeTx.Confirmations = transaction.Confirmations;
                         changeTx.Validation = true;
+
                         database.SaveChanges();
                         AddLine("ChangeTx[{0}]: Validation okay!", transaction.TxId);
                     }
                 }
-
             }
-
         }
 
         /// <summary>
@@ -195,7 +223,7 @@ namespace CoinMillionsServer
             // check if it's linked to a ticket transaction
             RawTransaction rawtransaction = btc.GetRawTransactionObject(transaction.TxId);
             string rawtransactionTxId = rawtransaction.Vin[0].TxId;
-            if (!database.TicketTxes.Any(t => t.TxId == rawtransactionTxId))
+            if (!database.TransactionDetails.OfType<TicketTx>().Any(t => t.TxId == rawtransactionTxId))
                 return false;
 
             return true;
@@ -208,30 +236,51 @@ namespace CoinMillionsServer
         {
             lblStatus.Content = string.Format("makeChangeTxs");
 
-            foreach (TicketTx ticketTx in database.TicketTxes.Where(t => t.ChangeTx == null))
+            //foreach (TicketTx ticketTx in database.TransactionDetails.OfType<TicketTx>().Where(t => t.ChangeTx == null))
+            //{
+
+            TicketTx ticketTx = database.TransactionDetails.OfType<TicketTx>().Where(t => t.ChangeTx == null).FirstOrDefault();
+            if (ticketTx == null)
+                return;
+
+            string rawTransaction;
+            if (btc.CreateZeroConfirmationTransaction(ticketTx.TxId, ticketCost, networkFee, out rawTransaction))
             {
-                string rawTransaction;
-                if (btc.CreateZeroConfirmationTransaction(ticketTx.TxId, ticketCost, networkFee, out rawTransaction))
+                AddLine("rawTransaction[{0}]: {1}", ticketTx.TxId, true);
+                SignedRawTransaction signrawtransaction = btc.SignRawTransaction(rawTransaction);
+                AddLine("signedRawTransaction[{0}]: {1}", ticketTx.TxId, signrawtransaction.Complete);
+                if (signrawtransaction.Complete)
                 {
-                    AddLine("rawTransaction[{0}]: {1}", ticketTx.TxId, true);
-                    SignedRawTransaction signrawtransaction = btc.SignRawTransaction(rawTransaction);
-                    AddLine("signedRawTransaction[{0}]: {1}", ticketTx.TxId, signrawtransaction.Complete);
-                    if (signrawtransaction.Complete)
-                    {
-                        string changeTxId = btc.SendRawTransaction(signrawtransaction.Hex);
-                        AddLine("changeTxId[{0}]: {1}", ticketTx.TxId, changeTxId);
-                        ticketTx.ChangeTx = new ChangeTx()
-                        {
-                            TxId = changeTxId,
-                            Validation = false,
-                            TicketTx = ticketTx
-                        };
-                        database.SaveChanges();
-                    }
-                    else
-                        AddLine("signedRawTransaction[{0}]: {1}", "not completed!");
+
+                    // TODO ... need to check if it was successful !!!
+                    string changeTxId = btc.SendRawTransaction(signrawtransaction.Hex);
+
+                    //ChangeTx changeTx = new ChangeTx()
+                    //{
+                    //    Account = "",
+                    //    Address = "",
+                    //    Amount = 0.0,
+                    //    BlockHash = "",
+                    //    BlockIndex = 0,
+                    //    BlockTime = 0,
+                    //    Category = "",
+                    //    Confirmations = 0,
+                    //    Fee = 0,
+                    //    Time = 0,
+                    //    TimeReceived = 0,
+                    //    TxId = changeTxId,
+                    //    Validation = false
+                    //};
+
+                    AddLine("changeTxId[{0}]: {1}", ticketTx.TxId, changeTxId);
+                    //ticketTx.ChangeTx = changeTx;
+                    //database.SaveChanges();
                 }
+                else
+                    AddLine("signedRawTransaction[{0}]: {1}", "not completed!");
             }
+
+            //}
         }
 
         /// <summary>
@@ -248,18 +297,32 @@ namespace CoinMillionsServer
                 int payeeVoutN;
                 double payeeVoutValue;
 
-                bool duplicate = database.TicketTxes.Any(t => t.TxId == transaction.TxId);
+                bool duplicate = database.TransactionDetails.OfType<TicketTx>().Any(t => t.TxId == transaction.TxId);
 
                 if (isValidTicketTx(transaction) && !duplicate && btc.DeepTransactionInfo(transaction.TxId, out changeVoutAdress, out payeeVoutAdress, out payeeVoutN, out payeeVoutValue))
                 {
                     AddLine("Valid Ticket: {0}", transaction.TxId);
 
-                    database.TicketTxes.Add(new TicketTx()
+                    Block block = btc.GetBlock(transaction.BlockHash);
+
+                    TicketTx ticketTx = new TicketTx()
                     {
-                        TxId = transaction.TxId,
+                        Account = transaction.Account,
+                        Address = transaction.Address,
                         Amount = transaction.Amount,
-                        Sender = changeVoutAdress
-                    });
+                        BlockHash = transaction.BlockHash,
+                        BlockIndex = transaction.BlockIndex,
+                        Blocks = block,
+                        BlockTime = transaction.BlockTime,
+                        Category = transaction.Category,
+                        Confirmations = transaction.Confirmations,
+                        Fee = transaction.Fee,
+                        Sender = changeVoutAdress,
+                        Time = transaction.Time,
+                        TimeReceived = transaction.TimeReceived,
+                        TxId = transaction.TxId
+                    };
+                    database.TransactionDetails.Add(ticketTx);
                     database.SaveChanges();
                 }
                 //else
@@ -267,6 +330,11 @@ namespace CoinMillionsServer
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
         private bool isValidTicketTx(TransactionDetail transaction)
         {
             // amount check
@@ -276,7 +344,7 @@ namespace CoinMillionsServer
             // category check
             if (transaction.Category != "receive")
                 return false;
-            
+
             // adress check
             if (!btc.ValidateAddress(transaction.Address).IsMine)
                 return false;
@@ -284,6 +352,11 @@ namespace CoinMillionsServer
             return true;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="args"></param>
         public void AddLine(string text, params object[] args)
         {
             outputBox.AppendText(DateTime.Now.ToLongTimeString() + " # " + string.Format(text, args));
@@ -301,14 +374,57 @@ namespace CoinMillionsServer
             return span.TotalSeconds;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void CheckBox_Clicked(object sender, RoutedEventArgs e)
         {
-            foreach(TicketTx ticketTx in database.TicketTxes)
+            buildChangeTxFlag = (bool)chBxChangeTx.IsChecked;
+            AddLine("Building ChangeTx? {0}", buildChangeTxFlag);
+        }
+
+        private void Button_Click_Shape(object sender, RoutedEventArgs e)
+        {
+            foreach (Finding shape in lottery.getShapes())
             {
-                int[] personalTicket = numbAlgo.getTicketFromValue(ticketTx.Amount);
-                int[] randomTicket = numbAlgo.getTicketFromHash(ticketTx.TxId);
-                int splitHashLenght = numbAlgo.getSplitHashLenght(ticketTx.TxId);
-                AddLine("TicketTx[{0}] Pers.: {1} Rand.: {2} [{3}]", ticketTx.ID, numbAlgo.getArrayToString(personalTicket), numbAlgo.getArrayToString(randomTicket), splitHashLenght);
+                AddLine(string.Format("N: {1}; S: {0}; P: {2}; G: {3}", shape.Numbers, shape.Stars, string.Format("{0,10:0.00000 %}", shape.Probability), string.Format("{0,8:0.000000}", shape.Gain)));
+            }
+            AddLine("{0} total probability", string.Format("{0,10:0.00 %}", lottery.getShapes().Sum(s => s.Probability)));
+            AddLine("{0} total gain", string.Format("{0,10:0.00 %}", lottery.getShapes().Sum(s => s.Gain)));
+        }
+
+        private void Button_Click_Ticket(object sender, RoutedEventArgs e)
+        {
+            foreach (TicketTx ticketTx in database.TransactionDetails.OfType<TicketTx>())
+            {
+                int[] personalTicket = lottery.getTicketFromValue(ticketTx.Amount);
+                int[] randomTicket = lottery.getTicketFromHash(ticketTx.TxId);
+                int splitHashLenght = lottery.getSplitHashLenght(ticketTx.TxId);
+                AddLine("TicketTx[{0}] Pers.: {1} Rand.: {2} [{3}]", ticketTx.ID, lottery.getArrayToString(personalTicket), lottery.getArrayToString(randomTicket), splitHashLenght);
+            }
+        }
+
+        private void Button_Click_Draw(object sender, RoutedEventArgs e)
+        {
+            AddLine("Drawed Ticket Block[{0}] --------------------- ", actualInfo.Blocks);
+            AddLine("Draw.: {0}", lottery.getArrayToString(actualDraw));
+
+            foreach (TicketTx ticketTx in database.TransactionDetails.OfType<TicketTx>())
+            {
+                int[] personalTicket = lottery.getTicketFromValue(ticketTx.Amount);
+                int[] randomTicket = lottery.getTicketFromHash(ticketTx.TxId);
+
+                Finding personalFinding = lottery.compareTicket(actualDraw, personalTicket);
+                Finding randomFinding = lottery.compareTicket(actualDraw, randomTicket);
+
+                //Finding personalFinding = lottery.compareTicket(actualDraw, personalTicket);
+                //Finding randomFinding = lottery.compareTicket(actualDraw, randomTicket);
+
+                AddLine("TicketTx[{0}] -------------------------- ", ticketTx.ID);
+                AddLine("Pers.: {0}", lottery.getArrayToString(personalTicket));
+                //AddLine("Hits: N {0}, S {1}", personalArray[0], personalArray[1]);
+                AddLine("Number: {0}, Star: {1}, Probability: {2}, Gain: {3}", personalFinding.Numbers, personalFinding.Stars, personalFinding.Probability, personalFinding.Gain);
+                AddLine("Rand.: {0}", lottery.getArrayToString(randomTicket));
+                //AddLine("Hits: N {0}, S {1}", randomArray[0], randomArray[1]);
+                AddLine("Number: {0}, Star: {1}, Probability: {2}, Gain: {3}", randomFinding.Numbers, randomFinding.Stars, randomFinding.Probability, randomFinding.Gain);
+
             }
         }
 

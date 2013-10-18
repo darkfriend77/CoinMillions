@@ -25,7 +25,8 @@ namespace CoinMillionsServer
             throw new UnintentionalCodeFirstException();
         }
     
-        public DbSet<TicketTx> TicketTxes { get; set; }
-        public DbSet<ChangeTx> ChangeTxes { get; set; }
+        public DbSet<Finding> Findings { get; set; }
+        public DbSet<Block> Blocks { get; set; }
+        public DbSet<TransactionDetail> TransactionDetails { get; set; }
     }
 }

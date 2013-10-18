@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BitcoinWrapper.Common;
-using BitcoinWrapper.Data;
+using CoinMillionsServer.Data;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace BitcoinWrapper.Wrapper
+namespace CoinMillionsServer.Wrapper
 {
     public class BitcoinQtConnector
     {
@@ -310,11 +309,18 @@ namespace BitcoinWrapper.Wrapper
         //    return BaseConnector.RequestServer(MethodName.setgenerate, variable)["result"].ToString();
         //}
 
-        //public string SendToAddress(string bitcoinAddress, float amount)
-        //{
-        //    var rawTransaction = BaseConnector.RequestServer(MethodName.sendtoaddress, new List<object>() { bitcoinAddress, amount })["result"].ToString();
-        //    return rawTransaction;
-        //}
+        /// <summary>
+        /// <amount> is a real and is rounded to 8 decimal places. Returns the transaction ID <txid> if successful.
+        /// 
+        /// example. sendtoaddress <bitcoinaddress> <amount> [comment] [comment-to]
+        /// </summary>
+        /// <param name="bitcoinAddress"></param>
+        /// <param name="amount"></param>
+        /// <returns></returns>
+        public string SendToAddress(string bitcoinAddress, float amount)
+        {
+            return BaseConnector.RequestServer(MethodName.sendtoaddress, new List<object>() { bitcoinAddress, amount })["result"].ToString();
+        }
 
         public string SendRawTransaction(string rawTrans)
         {

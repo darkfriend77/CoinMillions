@@ -12,13 +12,11 @@ namespace CoinMillionsServer
     using System;
     using System.Collections.Generic;
     
-    public partial class TicketTx
+    public partial class TicketTx : TransactionDetail
     {
-        public int ID { get; set; }
-        public string TxId { get; set; }
-        public double Amount { get; set; }
         public string Sender { get; set; }
     
+        public virtual Finding Findings { get; set; }
         public virtual ChangeTx ChangeTx { get; set; }
     }
 }

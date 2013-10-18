@@ -65,6 +65,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Numerics" />
@@ -87,13 +88,33 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Block.cs">
+      <DependentUpon>CoinMillionsModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="ChangeTx.cs">
       <DependentUpon>CoinMillionsModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Common\Constants.cs" />
+    <Compile Include="Common\NodeAction.cs" />
     <Compile Include="Core\Lottery.cs" />
+    <Compile Include="Data\Account.cs" />
+    <Compile Include="Data\Adress.cs" />
+    <Compile Include="Data\Block.cs" />
+    <Compile Include="Data\Info.cs" />
+    <Compile Include="Data\MethodName.cs" />
+    <Compile Include="Data\RawTransaction.cs" />
+    <Compile Include="Data\Transaction.cs" />
+    <Compile Include="Finding.cs">
+      <DependentUpon>CoinMillionsModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="TicketTx.cs">
       <DependentUpon>CoinMillionsModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="TransactionDetail.cs">
+      <DependentUpon>CoinMillionsModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Wrapper\BaseBtcConnector.cs" />
+    <Compile Include="Wrapper\BaseConnector.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -117,7 +138,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>CoinMillionsModel.edmx</DependentUpon>
     </Compile>
-    <Compile Include="Core\NumberAlgorithm.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -170,12 +190,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BitcoinWrapper\BitcoinWrapper.csproj">
-      <Project>{b853e315-7103-4cba-8873-d5202019f267}</Project>
-      <Name>BitcoinWrapper</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
@@ -204,6 +218,9 @@
       <ProductName>SQL Server Compact 4.0 SP1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Database\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

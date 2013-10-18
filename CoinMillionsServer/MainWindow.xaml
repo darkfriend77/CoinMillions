@@ -6,10 +6,10 @@
         <RichTextBox x:Name="outputBox"
                      VerticalScrollBarVisibility="Visible" 
                      HorizontalScrollBarVisibility="Visible" 
-                     IsReadOnly="True" Margin="0,200,0,0" Padding="0" FontFamily="Lucida Console" FontSize="10" Grid.ColumnSpan="3" Width="750"/>
+                     IsReadOnly="True" Margin="0,200,0,0" Padding="0" FontFamily="Lucida Console" FontSize="10"/>
         <ProgressBar x:Name="progressBar1" Height="40" Margin="0,155,0,170" Padding="0" Width="750"/>
-        <Label Content="Tickets:" HorizontalAlignment="Left" Margin="21,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.404,-0.993" Foreground="White"/>
-        <Label x:Name="lblTicketCount" Content="0" HorizontalAlignment="Left" Margin="100,10,0,0" VerticalAlignment="Top" Foreground="Lime"/>
+        <Label Content="Tickets:" HorizontalAlignment="Left" Margin="253,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.404,-0.993" Foreground="White"/>
+        <Label x:Name="lblTicketsCount" Content="0" HorizontalAlignment="Left" Margin="316,10,0,0" VerticalAlignment="Top" Foreground="Lime"/>
         <Label x:Name="lblAmount" Content="0" HorizontalAlignment="Left" Margin="100,36,0,0" VerticalAlignment="Top" Foreground="Lime"/>
         <Label Content="Amount:" HorizontalAlignment="Left" Margin="21,36,0,0" VerticalAlignment="Top" Foreground="White"/>
         <Label Content="Status:" HorizontalAlignment="Left" Margin="253,114,0,0" VerticalAlignment="Top" Foreground="Yellow" FontWeight="Bold"/>
@@ -20,6 +20,13 @@
         <Label x:Name="lblActBlock" Content="0" HorizontalAlignment="Left" Margin="100,62,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.421,-0.115" Foreground="Lime"/>
         <Label x:Name="lblDifficulty" Content="0" HorizontalAlignment="Left" Margin="100,88,0,0" VerticalAlignment="Top" Foreground="Lime"/>
         <Label x:Name="lblGenTicket" Content="0" HorizontalAlignment="Left" Margin="100,114,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.711,1.885" Foreground="Lime"/>
-        <Button Content="Tickets" HorizontalAlignment="Left" Margin="667,130,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.72,-3.727" Click="Button_Click"/>
+        <Button Content="Ticket" HorizontalAlignment="Left" Margin="667,130,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.72,-3.727" Click="Button_Click_Ticket"/>
+        <CheckBox x:Name="chBxChangeTx" Content="Build ChangeTx?" HorizontalAlignment="Left" Margin="628,10,0,0" VerticalAlignment="Top" Foreground="White" Click="CheckBox_Clicked"/>
+        <Button Content="Shape" HorizontalAlignment="Left" Margin="667,103,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_Shape"/>
+        <Button Content="Draw" HorizontalAlignment="Left" Margin="667,76,0,0" VerticalAlignment="Top" Width="75" ClipToBounds="True" Click="Button_Click_Draw"/>
+        <Label Content="Blocks:" HorizontalAlignment="Left" Margin="253,62,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label x:Name="lblBlocksCount" Content="0" HorizontalAlignment="Left" Margin="316,62,0,0" VerticalAlignment="Top" Foreground="Lime" Grid.IsSharedSizeScope="True"/>
+        <Label Content="Changes:" HorizontalAlignment="Left" Margin="253,36,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.423" Foreground="White"/>
+        <Label x:Name="lblChangesCount" Content="0" HorizontalAlignment="Left" Margin="316,36,0,0" VerticalAlignment="Top" Foreground="Lime"/>
     </Grid>
 </Window>

@@ -12,10 +12,19 @@ namespace CoinMillionsServer
     using System;
     using System.Collections.Generic;
     
-    public partial class ChangeTx : TransactionDetail
+    public partial class Finding
     {
-        public bool Validation { get; set; }
+        public Finding()
+        {
+            this.TicketTx = new HashSet<TicketTx>();
+        }
     
-        public virtual TicketTx TicketTx { get; set; }
+        public int ID { get; set; }
+        public int Numbers { get; set; }
+        public int Stars { get; set; }
+        public double Probability { get; set; }
+        public double Gain { get; set; }
+    
+        public virtual ICollection<TicketTx> TicketTx { get; set; }
     }
 }

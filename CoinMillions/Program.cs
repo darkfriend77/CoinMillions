@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BitcoinWrapper.Data;
-using BitcoinWrapper.Wrapper;
+using CoinMillionsServer.Wrapper;
+using MathNet.Numerics;
+using MathNet.Numerics.Distributions;
 using Newtonsoft.Json.Linq;
 
 namespace CoinMillions
@@ -155,6 +156,40 @@ namespace CoinMillions
 
             //'[{"txid":"7649b33b6d80f7b5c866fbdb413419e04223974b0a5d6a3ca54944f30474d2bf","vout":0}]' '{"mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5":50}'
             //Console.WriteLine("CreateRawTransaction: {0}", btc.CreateRawTransaction("7649b33b6d80f7b5c866fbdb413419e04223974b0a5d6a3ca54944f30474d2bf", 0, "mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5", (long)50.0));
+
+
+
+
+
+
+
+
+            //Console.WriteLine(btc.SendToAddress("muJusbBPg8pkuoDzjhCDzjPxGEaNafiWXY", 0.01699976f));
+
+
+
+
+
+            //int NUMBERS = 5;
+            //int MAXNUMBERS = 22;
+            //int STARS = 2;
+            //int MAXSTARS = 9;
+
+            ////ulong count = 1;
+            //// numbers
+            //for (int a = 1; a < MAXNUMBERS - NUMBERS + 2; a++)
+            //    for (int b = a + 1; b < MAXNUMBERS - NUMBERS + 3; b++)
+            //        for (int c = b + 1; c < MAXNUMBERS - NUMBERS + 4; c++)
+            //            for (int d = c + 1; d < MAXNUMBERS - NUMBERS + 5; d++)
+            //                for (int e = d + 1; e < MAXNUMBERS - NUMBERS + 6; e++)
+
+            //                    // stars
+            //                    for (int s = 1; s < MAXSTARS - STARS + 4; s++)
+            //                        for (int t = s + 1; t < MAXSTARS - STARS + 3; t++)
+            //                        {
+            //                            Console.WriteLine("[ {0}, {1}, {2}, {3}, {4} ] [ {5}, {6}]", a, b, c, d, e, s, t);
+            //                            Console.ReadKey();
+            //                        }
 
             Console.ReadKey();
         }
