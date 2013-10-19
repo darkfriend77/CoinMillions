@@ -21,12 +21,13 @@
         <Label x:Name="lblDifficulty" Content="0" HorizontalAlignment="Left" Margin="100,88,0,0" VerticalAlignment="Top" Foreground="Lime"/>
         <Label x:Name="lblGenTicket" Content="0" HorizontalAlignment="Left" Margin="100,114,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.711,1.885" Foreground="Lime"/>
         <Button Content="Ticket" HorizontalAlignment="Left" Margin="667,130,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.72,-3.727" Click="Button_Click_Ticket"/>
-        <CheckBox x:Name="chBxChangeTx" Content="Build ChangeTx?" HorizontalAlignment="Left" Margin="628,10,0,0" VerticalAlignment="Top" Foreground="White" Click="CheckBox_Clicked"/>
-        <Button Content="Shape" HorizontalAlignment="Left" Margin="667,103,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_Shape"/>
+        <CheckBox x:Name="chBxChangeTx" Content="Build ChangeTx?" HorizontalAlignment="Left" Margin="612,10,0,0" VerticalAlignment="Top" Foreground="White" Click="CheckBox_Clicked_BuildChangeTx"/>
+        <Button Content="Finding" HorizontalAlignment="Left" Margin="667,103,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_Finding"/>
         <Button Content="Draw" HorizontalAlignment="Left" Margin="667,76,0,0" VerticalAlignment="Top" Width="75" ClipToBounds="True" Click="Button_Click_Draw"/>
         <Label Content="Blocks:" HorizontalAlignment="Left" Margin="253,62,0,0" VerticalAlignment="Top" Foreground="White"/>
         <Label x:Name="lblBlocksCount" Content="0" HorizontalAlignment="Left" Margin="316,62,0,0" VerticalAlignment="Top" Foreground="Lime" Grid.IsSharedSizeScope="True"/>
         <Label Content="Changes:" HorizontalAlignment="Left" Margin="253,36,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.423" Foreground="White"/>
         <Label x:Name="lblChangesCount" Content="0" HorizontalAlignment="Left" Margin="316,36,0,0" VerticalAlignment="Top" Foreground="Lime"/>
+        <CheckBox x:Name="chBxDrawRnd" Content="Draw next rnd.?" HorizontalAlignment="Left" Margin="612,26,0,0" VerticalAlignment="Top" Foreground="White" Click="CheckBox_Clicked_DrawNextRound"/>
     </Grid>
 </Window>

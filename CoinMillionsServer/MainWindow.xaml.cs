@@ -43,6 +43,7 @@ namespace CoinMillionsServer
         private CoinMillionsModelContainer database;
 
         private bool buildChangeTxFlag;
+        private bool drawNextRndFlag;
 
         private Info actualInfo;
         private int[] actualDraw;
@@ -57,7 +58,7 @@ namespace CoinMillionsServer
 
             // initialize
             this.btc = new BitcoinQtConnector();
-            this.lottery = new Lottery(database);
+            this.lottery = new Lottery();
 
             Loaded += OnLoaded;
 
@@ -74,7 +75,14 @@ namespace CoinMillionsServer
 
         private void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
         {
+            foreach (Finding finding in lottery.getFindings())
+                database.Findings.Add(finding);
+            database.SaveChanges();
+
+            AddLine("We have added {0} findings to the db.", database.Findings.Count());
+
             buildChangeTxFlag = (bool)chBxChangeTx.IsChecked;
+            drawNextRndFlag = (bool)chBxDrawRnd.IsChecked;
 
             progressBar1.Foreground = Brushes.Red;
             progressBar1.Minimum = 0;
@@ -349,6 +357,10 @@ namespace CoinMillionsServer
             if (!btc.ValidateAddress(transaction.Address).IsMine)
                 return false;
 
+            int[] ticket = null;
+            if (!lottery.getTicketFromAmount(transaction.Amount, out ticket))
+                return false;
+
             return true;
         }
 
@@ -374,30 +386,33 @@ namespace CoinMillionsServer
             return span.TotalSeconds;
         }
 
-        private void CheckBox_Clicked(object sender, RoutedEventArgs e)
+        private void CheckBox_Clicked_BuildChangeTx(object sender, RoutedEventArgs e)
         {
             buildChangeTxFlag = (bool)chBxChangeTx.IsChecked;
             AddLine("Building ChangeTx? {0}", buildChangeTxFlag);
         }
 
-        private void Button_Click_Shape(object sender, RoutedEventArgs e)
+        private void Button_Click_Finding(object sender, RoutedEventArgs e)
         {
-            foreach (Finding shape in lottery.getShapes())
+            foreach (Finding finding in database.Findings)
             {
-                AddLine(string.Format("N: {1}; S: {0}; P: {2}; G: {3}", shape.Numbers, shape.Stars, string.Format("{0,10:0.00000 %}", shape.Probability), string.Format("{0,8:0.000000}", shape.Gain)));
+                AddLine(string.Format("N: {1}; S: {0}; P: {2}; G: {3}", finding.Numbers, finding.Stars, string.Format("{0,10:0.00000 %}", finding.Probability), string.Format("{0,8:0.000000}", finding.Gain)));
             }
-            AddLine("{0} total probability", string.Format("{0,10:0.00 %}", lottery.getShapes().Sum(s => s.Probability)));
-            AddLine("{0} total gain", string.Format("{0,10:0.00 %}", lottery.getShapes().Sum(s => s.Gain)));
+            AddLine("{0} total probability", string.Format("{0,10:0.00 %}", database.Findings.Sum(s => s.Probability)));
+            AddLine("{0} total gain", string.Format("{0,10:0.00 %}", database.Findings.Sum(s => s.Gain)));
         }
 
         private void Button_Click_Ticket(object sender, RoutedEventArgs e)
         {
             foreach (TicketTx ticketTx in database.TransactionDetails.OfType<TicketTx>())
             {
-                int[] personalTicket = lottery.getTicketFromValue(ticketTx.Amount);
+                int[] personalTicket;
                 int[] randomTicket = lottery.getTicketFromHash(ticketTx.TxId);
                 int splitHashLenght = lottery.getSplitHashLenght(ticketTx.TxId);
-                AddLine("TicketTx[{0}] Pers.: {1} Rand.: {2} [{3}]", ticketTx.ID, lottery.getArrayToString(personalTicket), lottery.getArrayToString(randomTicket), splitHashLenght);
+                if (lottery.getTicketFromAmount(ticketTx.Amount, out personalTicket))
+                    AddLine("TicketTx[{0}] Pers.: {1} Rand.: {2} [{3}]", ticketTx.ID, lottery.getArrayToString(personalTicket), lottery.getArrayToString(randomTicket), splitHashLenght);
+                else
+                    AddLine("TicketTx[{0}] Pers.: {1} Rand.: {2} [{3}]", ticketTx.ID, "BAD TICKET!", lottery.getArrayToString(randomTicket), splitHashLenght);
             }
         }
 
@@ -408,24 +423,35 @@ namespace CoinMillionsServer
 
             foreach (TicketTx ticketTx in database.TransactionDetails.OfType<TicketTx>())
             {
-                int[] personalTicket = lottery.getTicketFromValue(ticketTx.Amount);
-                int[] randomTicket = lottery.getTicketFromHash(ticketTx.TxId);
-
-                Finding personalFinding = lottery.compareTicket(actualDraw, personalTicket);
-                Finding randomFinding = lottery.compareTicket(actualDraw, randomTicket);
-
-                //Finding personalFinding = lottery.compareTicket(actualDraw, personalTicket);
-                //Finding randomFinding = lottery.compareTicket(actualDraw, randomTicket);
-
+                int pN, sN;
                 AddLine("TicketTx[{0}] -------------------------- ", ticketTx.ID);
-                AddLine("Pers.: {0}", lottery.getArrayToString(personalTicket));
-                //AddLine("Hits: N {0}, S {1}", personalArray[0], personalArray[1]);
-                AddLine("Number: {0}, Star: {1}, Probability: {2}, Gain: {3}", personalFinding.Numbers, personalFinding.Stars, personalFinding.Probability, personalFinding.Gain);
-                AddLine("Rand.: {0}", lottery.getArrayToString(randomTicket));
-                //AddLine("Hits: N {0}, S {1}", randomArray[0], randomArray[1]);
-                AddLine("Number: {0}, Star: {1}, Probability: {2}, Gain: {3}", randomFinding.Numbers, randomFinding.Stars, randomFinding.Probability, randomFinding.Gain);
 
+                int[] personalTicket;
+                if (lottery.getTicketFromAmount(ticketTx.Amount, out personalTicket))
+                {
+                    int[] personalArray = lottery.compareTicket(actualDraw, personalTicket);
+                    pN = personalArray[0];
+                    sN = personalArray[1];
+                    Finding personalFinding = database.Findings.Where(s => s.Numbers == pN && s.Stars == sN).First();
+                    AddLine("Pers.: {0}", lottery.getArrayToString(personalTicket));
+                    AddLine("Number: {0}, Star: {1}, Probability: {2}, Gain: {3}", personalFinding.Numbers, personalFinding.Stars, personalFinding.Probability, personalFinding.Gain);
+                }
+
+                int[] randomTicket = lottery.getTicketFromHash(ticketTx.TxId);
+                int[] RandomArray = lottery.compareTicket(actualDraw, randomTicket);
+                pN = RandomArray[0];
+                sN = RandomArray[1];
+                Finding randomFinding = database.Findings.Where(s => s.Numbers == pN && s.Stars == sN).First();
+
+                AddLine("Rand.: {0}", lottery.getArrayToString(randomTicket));
+                AddLine("Number: {0}, Star: {1}, Probability: {2}, Gain: {3}", randomFinding.Numbers, randomFinding.Stars, randomFinding.Probability, randomFinding.Gain);
             }
+        }
+
+        private void CheckBox_Clicked_DrawNextRound(object sender, RoutedEventArgs e)
+        {
+            drawNextRndFlag = (bool)chBxDrawRnd.IsChecked;
+            AddLine("Draw next rnd.? {0}", drawNextRndFlag);
         }
 
     }

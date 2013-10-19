@@ -14,34 +14,20 @@ namespace CoinMillionsServer.Core
         const int STARS = 2;
         const int MAXSTARS = 9;
 
-        private List<Finding> findings = new List<Finding>();
-
         private Dictionary<ulong, int[]> ticketDictonary = new Dictionary<ulong, int[]>();
 
-        private CoinMillionsModelContainer database;
-
-        public Lottery(CoinMillionsModelContainer database)
+        public Lottery()
         {
-            this.database = database;
-
-            generateShapes();
             generateNumbers();
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <returns></returns>
-        public List<Finding> getShapes()
+        public List<Finding> getFindings()
         {
-            return findings;
-        }
+            List<Finding> findings = new List<Finding>();
 
-        /// <summary>
-        /// 
-        /// </summary>
-        private void generateShapes()
-        {
             double gain = 1;
             double raiser = 1;
             double totalGain = 0;
@@ -75,6 +61,7 @@ namespace CoinMillionsServer.Core
                     });
                 }
             }
+            return findings;
         }
 
         /// <summary>
@@ -151,16 +138,13 @@ namespace CoinMillionsServer.Core
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="amount"></param>
+        /// <param name="ticket"></param>
         /// <returns></returns>
-        public int[] getTicketFromValue(double value)
+        internal bool getTicketFromAmount(double amount, out int[] ticket)
         {
-            if (value > 0.01 && value < 0.02)
-            {
-                ulong key = Convert.ToUInt64((value - 0.01) * Math.Pow(10, 8));
-                return ticketDictonary[key];
-            }
-            return null;
+            ulong key = Convert.ToUInt64((amount - 0.01) * Math.Pow(10, 8));
+            return ticketDictonary.TryGetValue(key, out ticket);
         }
 
         /// <summary>
@@ -196,7 +180,7 @@ namespace CoinMillionsServer.Core
         /// <param name="ticketA"></param>
         /// <param name="ticketB"></param>
         /// <returns></returns>
-        public Finding compareTicket(int[] ticketA, int[] ticketB)
+        public int[] compareTicket(int[] ticketA, int[] ticketB)
         {
             int[] numbersA = new int[NUMBERS];
             int[] numbersB = new int[NUMBERS];
@@ -209,7 +193,7 @@ namespace CoinMillionsServer.Core
             Array.Copy(ticketA, 5, starsA, 0, STARS);
             Array.Copy(ticketB, 5, starsB, 0, STARS);
 
-            return getFinding(new int[] { compareArray(numbersA, numbersB), compareArray(starsA, starsB) });
+            return new int[] { compareArray(numbersA, numbersB), compareArray(starsA, starsB) };
         }
 
         /// <summary>
@@ -249,18 +233,6 @@ namespace CoinMillionsServer.Core
                         count++;
             return count;
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="numbers"></param>
-        /// <param name="stars"></param>
-        /// <returns></returns>
-        public Finding getFinding(int[] numbersStars)
-        {
-            return findings.Where(s => s.Numbers == numbersStars[0] && s.Stars == numbersStars[1]).First();
-        }
-
     }
 
     //class Finding
