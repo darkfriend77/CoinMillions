@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MathNet.Numerics;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CoinMillionsServer.Core
 {
@@ -232,6 +234,19 @@ namespace CoinMillionsServer.Core
                     if (numberA == numberB)
                         count++;
             return count;
+        }
+
+        internal string getTicketStringFromTicket(int[] randomTicket)
+        {
+            JArray jArray = new JArray();
+            foreach (int n in randomTicket)
+                jArray.Add(n);
+            return jArray.ToString();
+        }
+
+        internal int[] getTicketFromTicketString(string ticketString)
+        {
+            return ((JArray)JsonConvert.DeserializeObject(ticketString)).ToObject<int[]>();
         }
     }
 

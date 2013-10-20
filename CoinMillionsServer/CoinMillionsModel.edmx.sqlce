@@ -2,7 +2,7 @@
 -- --------------------------------------------------
 -- Entity Designer DDL Script for SQL Server Compact Edition
 -- --------------------------------------------------
--- Date Created: 10/18/2013 20:41:01
+-- Date Created: 10/20/2013 16:07:00
 -- Generated from EDMX file: D:\Bitcoin\Projects\CoinMillions\CoinMillionsServer\CoinMillionsModel.edmx
 -- --------------------------------------------------
 
@@ -12,16 +12,15 @@
 -- NOTE: if the constraint does not exist, an ignorable error will be reported.
 -- --------------------------------------------------
 
-    ALTER TABLE [TransactionDetails_TicketTx] DROP CONSTRAINT [FK_TicketTxFinding];
-GO
     ALTER TABLE [TransactionDetails] DROP CONSTRAINT [FK_TransactionDetailBlock];
-GO
     ALTER TABLE [TransactionDetails_ChangeTx] DROP CONSTRAINT [FK_TicketTxChangeTx];
-GO
+    ALTER TABLE [Tickets] DROP CONSTRAINT [FK_TicketTxTicket];
+    ALTER TABLE [Tickets] DROP CONSTRAINT [FK_TicketFinding];
+    ALTER TABLE [Blocks_DrawBlock] DROP CONSTRAINT [FK_DrawBlockTicket];
+    ALTER TABLE [TransactionDetails_TicketTx] DROP CONSTRAINT [FK_DrawBlockTicketTx];
     ALTER TABLE [TransactionDetails_TicketTx] DROP CONSTRAINT [FK_TicketTx_inherits_TransactionDetail];
-GO
     ALTER TABLE [TransactionDetails_ChangeTx] DROP CONSTRAINT [FK_ChangeTx_inherits_TransactionDetail];
-GO
+    ALTER TABLE [Blocks_DrawBlock] DROP CONSTRAINT [FK_DrawBlock_inherits_Block];
 
 -- --------------------------------------------------
 -- Dropping existing tables
@@ -29,15 +28,12 @@ GO
 -- --------------------------------------------------
 
     DROP TABLE [Findings];
-GO
     DROP TABLE [Blocks];
-GO
     DROP TABLE [TransactionDetails];
-GO
+    DROP TABLE [Tickets];
     DROP TABLE [TransactionDetails_TicketTx];
-GO
     DROP TABLE [TransactionDetails_ChangeTx];
-GO
+    DROP TABLE [Blocks_DrawBlock];
 
 -- --------------------------------------------------
 -- Creating all tables
@@ -51,7 +47,6 @@ CREATE TABLE [Findings] (
     [Probability] float  NOT NULL,
     [Gain] float  NOT NULL
 );
-GO
 
 -- Creating table 'Blocks'
 CREATE TABLE [Blocks] (
@@ -68,7 +63,6 @@ CREATE TABLE [Blocks] (
     [PreviousBlockHash] nvarchar(4000)  NOT NULL,
     [NextBlockHash] nvarchar(4000)  NOT NULL
 );
-GO
 
 -- Creating table 'TransactionDetails'
 CREATE TABLE [TransactionDetails] (
@@ -87,15 +81,21 @@ CREATE TABLE [TransactionDetails] (
     [Fee] float  NOT NULL,
     [Blocks_ID] int  NULL
 );
-GO
+
+-- Creating table 'Tickets'
+CREATE TABLE [Tickets] (
+    [ID] int IDENTITY(1,1) NOT NULL,
+    [TicketString] nvarchar(4000)  NOT NULL,
+    [TicketTx_ID] int  NOT NULL,
+    [Findings_ID] int  NULL
+);
 
 -- Creating table 'TransactionDetails_TicketTx'
 CREATE TABLE [TransactionDetails_TicketTx] (
     [Sender] nvarchar(4000)  NOT NULL,
     [ID] int  NOT NULL,
-    [Findings_ID] int  NULL
+    [DrawBlock_ID] int  NULL
 );
-GO
 
 -- Creating table 'TransactionDetails_ChangeTx'
 CREATE TABLE [TransactionDetails_ChangeTx] (
@@ -103,7 +103,12 @@ CREATE TABLE [TransactionDetails_ChangeTx] (
     [ID] int  NOT NULL,
     [TicketTx_ID] int  NOT NULL
 );
-GO
+
+-- Creating table 'Blocks_DrawBlock'
+CREATE TABLE [Blocks_DrawBlock] (
+    [ID] int  NOT NULL,
+    [Tickets_ID] int  NOT NULL
+);
 
 -- --------------------------------------------------
 -- Creating all PRIMARY KEY constraints
@@ -113,49 +118,40 @@ GO
 ALTER TABLE [Findings]
 ADD CONSTRAINT [PK_Findings]
     PRIMARY KEY ([ID] );
-GO
 
 -- Creating primary key on [ID] in table 'Blocks'
 ALTER TABLE [Blocks]
 ADD CONSTRAINT [PK_Blocks]
     PRIMARY KEY ([ID] );
-GO
 
 -- Creating primary key on [ID] in table 'TransactionDetails'
 ALTER TABLE [TransactionDetails]
 ADD CONSTRAINT [PK_TransactionDetails]
     PRIMARY KEY ([ID] );
-GO
+
+-- Creating primary key on [ID] in table 'Tickets'
+ALTER TABLE [Tickets]
+ADD CONSTRAINT [PK_Tickets]
+    PRIMARY KEY ([ID] );
 
 -- Creating primary key on [ID] in table 'TransactionDetails_TicketTx'
 ALTER TABLE [TransactionDetails_TicketTx]
 ADD CONSTRAINT [PK_TransactionDetails_TicketTx]
     PRIMARY KEY ([ID] );
-GO
 
 -- Creating primary key on [ID] in table 'TransactionDetails_ChangeTx'
 ALTER TABLE [TransactionDetails_ChangeTx]
 ADD CONSTRAINT [PK_TransactionDetails_ChangeTx]
     PRIMARY KEY ([ID] );
-GO
+
+-- Creating primary key on [ID] in table 'Blocks_DrawBlock'
+ALTER TABLE [Blocks_DrawBlock]
+ADD CONSTRAINT [PK_Blocks_DrawBlock]
+    PRIMARY KEY ([ID] );
 
 -- --------------------------------------------------
 -- Creating all FOREIGN KEY constraints
 -- --------------------------------------------------
-
--- Creating foreign key on [Findings_ID] in table 'TransactionDetails_TicketTx'
-ALTER TABLE [TransactionDetails_TicketTx]
-ADD CONSTRAINT [FK_TicketTxFinding]
-    FOREIGN KEY ([Findings_ID])
-    REFERENCES [Findings]
-        ([ID])
-    ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- Creating non-clustered index for FOREIGN KEY 'FK_TicketTxFinding'
-CREATE INDEX [IX_FK_TicketTxFinding]
-ON [TransactionDetails_TicketTx]
-    ([Findings_ID]);
-GO
 
 -- Creating foreign key on [Blocks_ID] in table 'TransactionDetails'
 ALTER TABLE [TransactionDetails]
@@ -169,7 +165,6 @@ ADD CONSTRAINT [FK_TransactionDetailBlock]
 CREATE INDEX [IX_FK_TransactionDetailBlock]
 ON [TransactionDetails]
     ([Blocks_ID]);
-GO
 
 -- Creating foreign key on [TicketTx_ID] in table 'TransactionDetails_ChangeTx'
 ALTER TABLE [TransactionDetails_ChangeTx]
@@ -183,7 +178,58 @@ ADD CONSTRAINT [FK_TicketTxChangeTx]
 CREATE INDEX [IX_FK_TicketTxChangeTx]
 ON [TransactionDetails_ChangeTx]
     ([TicketTx_ID]);
-GO
+
+-- Creating foreign key on [TicketTx_ID] in table 'Tickets'
+ALTER TABLE [Tickets]
+ADD CONSTRAINT [FK_TicketTxTicket]
+    FOREIGN KEY ([TicketTx_ID])
+    REFERENCES [TransactionDetails_TicketTx]
+        ([ID])
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_TicketTxTicket'
+CREATE INDEX [IX_FK_TicketTxTicket]
+ON [Tickets]
+    ([TicketTx_ID]);
+
+-- Creating foreign key on [Findings_ID] in table 'Tickets'
+ALTER TABLE [Tickets]
+ADD CONSTRAINT [FK_TicketFinding]
+    FOREIGN KEY ([Findings_ID])
+    REFERENCES [Findings]
+        ([ID])
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_TicketFinding'
+CREATE INDEX [IX_FK_TicketFinding]
+ON [Tickets]
+    ([Findings_ID]);
+
+-- Creating foreign key on [Tickets_ID] in table 'Blocks_DrawBlock'
+ALTER TABLE [Blocks_DrawBlock]
+ADD CONSTRAINT [FK_DrawBlockTicket]
+    FOREIGN KEY ([Tickets_ID])
+    REFERENCES [Tickets]
+        ([ID])
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_DrawBlockTicket'
+CREATE INDEX [IX_FK_DrawBlockTicket]
+ON [Blocks_DrawBlock]
+    ([Tickets_ID]);
+
+-- Creating foreign key on [DrawBlock_ID] in table 'TransactionDetails_TicketTx'
+ALTER TABLE [TransactionDetails_TicketTx]
+ADD CONSTRAINT [FK_DrawBlockTicketTx]
+    FOREIGN KEY ([DrawBlock_ID])
+    REFERENCES [Blocks_DrawBlock]
+        ([ID])
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_DrawBlockTicketTx'
+CREATE INDEX [IX_FK_DrawBlockTicketTx]
+ON [TransactionDetails_TicketTx]
+    ([DrawBlock_ID]);
 
 -- Creating foreign key on [ID] in table 'TransactionDetails_TicketTx'
 ALTER TABLE [TransactionDetails_TicketTx]
@@ -192,7 +238,6 @@ ADD CONSTRAINT [FK_TicketTx_inherits_TransactionDetail]
     REFERENCES [TransactionDetails]
         ([ID])
     ON DELETE CASCADE ON UPDATE NO ACTION;
-GO
 
 -- Creating foreign key on [ID] in table 'TransactionDetails_ChangeTx'
 ALTER TABLE [TransactionDetails_ChangeTx]
@@ -201,7 +246,14 @@ ADD CONSTRAINT [FK_ChangeTx_inherits_TransactionDetail]
     REFERENCES [TransactionDetails]
         ([ID])
     ON DELETE CASCADE ON UPDATE NO ACTION;
-GO
+
+-- Creating foreign key on [ID] in table 'Blocks_DrawBlock'
+ALTER TABLE [Blocks_DrawBlock]
+ADD CONSTRAINT [FK_DrawBlock_inherits_Block]
+    FOREIGN KEY ([ID])
+    REFERENCES [Blocks]
+        ([ID])
+    ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- --------------------------------------------------
 -- Script has ended

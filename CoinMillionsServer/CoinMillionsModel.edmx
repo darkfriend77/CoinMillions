@@ -9,12 +9,10 @@
     <EntitySet Name="Findings" EntityType="CoinMillionsModel.Store.Findings" store:Type="Tables" Schema="dbo" />
     <EntitySet Name="Blocks" EntityType="CoinMillionsModel.Store.Blocks" store:Type="Tables" Schema="dbo" />
     <EntitySet Name="TransactionDetails" EntityType="CoinMillionsModel.Store.TransactionDetails" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Tickets" EntityType="CoinMillionsModel.Store.Tickets" store:Type="Tables" Schema="dbo" />
     <EntitySet Name="TransactionDetails_TicketTx" EntityType="CoinMillionsModel.Store.TransactionDetails_TicketTx" store:Type="Tables" Schema="dbo" />
     <EntitySet Name="TransactionDetails_ChangeTx" EntityType="CoinMillionsModel.Store.TransactionDetails_ChangeTx" store:Type="Tables" Schema="dbo" />
-    <AssociationSet Name="TicketTxFinding" Association="CoinMillionsModel.Store.TicketTxFinding">
-      <End Role="TicketTx" EntitySet="TransactionDetails_TicketTx" />
-      <End Role="Finding" EntitySet="Findings" />
-    </AssociationSet>
+    <EntitySet Name="Blocks_DrawBlock" EntityType="CoinMillionsModel.Store.Blocks_DrawBlock" store:Type="Tables" Schema="dbo" />
     <AssociationSet Name="TransactionDetailBlock" Association="CoinMillionsModel.Store.TransactionDetailBlock">
       <End Role="TransactionDetail" EntitySet="TransactionDetails" />
       <End Role="Block" EntitySet="Blocks" />
@@ -23,6 +21,22 @@
       <End Role="TicketTx" EntitySet="TransactionDetails_TicketTx" />
       <End Role="ChangeTx" EntitySet="TransactionDetails_ChangeTx" />
     </AssociationSet>
+    <AssociationSet Name="TicketTxTicket" Association="CoinMillionsModel.Store.TicketTxTicket">
+      <End Role="TicketTx" EntitySet="TransactionDetails_TicketTx" />
+      <End Role="Ticket" EntitySet="Tickets" />
+    </AssociationSet>
+    <AssociationSet Name="TicketFinding" Association="CoinMillionsModel.Store.TicketFinding">
+      <End Role="Ticket" EntitySet="Tickets" />
+      <End Role="Finding" EntitySet="Findings" />
+    </AssociationSet>
+    <AssociationSet Name="DrawBlockTicket" Association="CoinMillionsModel.Store.DrawBlockTicket">
+      <End Role="DrawBlock" EntitySet="Blocks_DrawBlock" />
+      <End Role="Ticket" EntitySet="Tickets" />
+    </AssociationSet>
+    <AssociationSet Name="DrawBlockTicketTx" Association="CoinMillionsModel.Store.DrawBlockTicketTx">
+      <End Role="DrawBlock" EntitySet="Blocks_DrawBlock" />
+      <End Role="TicketTx" EntitySet="TransactionDetails_TicketTx" />
+    </AssociationSet>
     <AssociationSet Name="FK_TicketTx_inherits_TransactionDetail" Association="CoinMillionsModel.Store.FK_TicketTx_inherits_TransactionDetail">
       <End Role="TransactionDetail" EntitySet="TransactionDetails" />
       <End Role="TicketTx" EntitySet="TransactionDetails_TicketTx" />
@@ -30,6 +44,10 @@
     <AssociationSet Name="FK_ChangeTx_inherits_TransactionDetail" Association="CoinMillionsModel.Store.FK_ChangeTx_inherits_TransactionDetail">
       <End Role="TransactionDetail" EntitySet="TransactionDetails" />
       <End Role="ChangeTx" EntitySet="TransactionDetails_ChangeTx" />
+    </AssociationSet>
+    <AssociationSet Name="FK_DrawBlock_inherits_Block" Association="CoinMillionsModel.Store.FK_DrawBlock_inherits_Block">
+      <End Role="Block" EntitySet="Blocks" />
+      <End Role="DrawBlock" EntitySet="Blocks_DrawBlock" />
     </AssociationSet>
   </EntityContainer>
   <EntityType Name="Findings">
@@ -78,13 +96,22 @@
     <Property Name="Fee" Type="float" Nullable="false" />
     <Property Name="Blocks_ID" Type="int" Nullable="true" />
   </EntityType>
+  <EntityType Name="Tickets">
+    <Key>
+      <PropertyRef Name="ID" />
+    </Key>
+    <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="TicketString" Type="nvarchar" Nullable="false" />
+    <Property Name="TicketTx_ID" Type="int" Nullable="false" />
+    <Property Name="Findings_ID" Type="int" Nullable="true" />
+  </EntityType>
   <EntityType Name="TransactionDetails_TicketTx">
     <Key>
       <PropertyRef Name="ID" />
     </Key>
     <Property Name="Sender" Type="nvarchar" Nullable="false" />
     <Property Name="ID" Type="int" Nullable="false" />
-    <Property Name="Findings_ID" Type="int" Nullable="true" />
+    <Property Name="DrawBlock_ID" Type="int" Nullable="true" />
   </EntityType>
   <EntityType Name="TransactionDetails_ChangeTx">
     <Key>
@@ -94,18 +121,13 @@
     <Property Name="ID" Type="int" Nullable="false" />
     <Property Name="TicketTx_ID" Type="int" Nullable="false" />
   </EntityType>
-  <Association Name="TicketTxFinding">
-    <End Role="TicketTx" Type="CoinMillionsModel.Store.TransactionDetails_TicketTx" Multiplicity="*" />
-    <End Role="Finding" Type="CoinMillionsModel.Store.Findings" Multiplicity="0..1" />
-    <ReferentialConstraint>
-      <Principal Role="Finding">
-        <PropertyRef Name="ID" />
-      </Principal>
-      <Dependent Role="TicketTx">
-        <PropertyRef Name="Findings_ID" />
-      </Dependent>
-    </ReferentialConstraint>
-  </Association>
+  <EntityType Name="Blocks_DrawBlock">
+    <Key>
+      <PropertyRef Name="ID" />
+    </Key>
+    <Property Name="ID" Type="int" Nullable="false" />
+    <Property Name="Tickets_ID" Type="int" Nullable="false" />
+  </EntityType>
   <Association Name="TransactionDetailBlock">
     <End Role="TransactionDetail" Type="CoinMillionsModel.Store.TransactionDetails" Multiplicity="*" />
     <End Role="Block" Type="CoinMillionsModel.Store.Blocks" Multiplicity="0..1" />
@@ -127,6 +149,54 @@
       </Principal>
       <Dependent Role="ChangeTx">
         <PropertyRef Name="TicketTx_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="TicketTxTicket">
+    <End Role="TicketTx" Type="CoinMillionsModel.Store.TransactionDetails_TicketTx" Multiplicity="1" />
+    <End Role="Ticket" Type="CoinMillionsModel.Store.Tickets" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="TicketTx">
+        <PropertyRef Name="ID" />
+      </Principal>
+      <Dependent Role="Ticket">
+        <PropertyRef Name="TicketTx_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="TicketFinding">
+    <End Role="Ticket" Type="CoinMillionsModel.Store.Tickets" Multiplicity="*" />
+    <End Role="Finding" Type="CoinMillionsModel.Store.Findings" Multiplicity="0..1" />
+    <ReferentialConstraint>
+      <Principal Role="Finding">
+        <PropertyRef Name="ID" />
+      </Principal>
+      <Dependent Role="Ticket">
+        <PropertyRef Name="Findings_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="DrawBlockTicket">
+    <End Role="DrawBlock" Type="CoinMillionsModel.Store.Blocks_DrawBlock" Multiplicity="*" />
+    <End Role="Ticket" Type="CoinMillionsModel.Store.Tickets" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Ticket">
+        <PropertyRef Name="ID" />
+      </Principal>
+      <Dependent Role="DrawBlock">
+        <PropertyRef Name="Tickets_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="DrawBlockTicketTx">
+    <End Role="DrawBlock" Type="CoinMillionsModel.Store.Blocks_DrawBlock" Multiplicity="0..1" />
+    <End Role="TicketTx" Type="CoinMillionsModel.Store.TransactionDetails_TicketTx" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="DrawBlock">
+        <PropertyRef Name="ID" />
+      </Principal>
+      <Dependent Role="TicketTx">
+        <PropertyRef Name="DrawBlock_ID" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -158,16 +228,26 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_DrawBlock_inherits_Block">
+    <End Role="Block" Type="CoinMillionsModel.Store.Blocks" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="DrawBlock" Type="CoinMillionsModel.Store.Blocks_DrawBlock" Multiplicity="0..1" />
+    <ReferentialConstraint>
+      <Principal Role="Block">
+        <PropertyRef Name="ID" />
+      </Principal>
+      <Dependent Role="DrawBlock">
+        <PropertyRef Name="ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
 </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" xmlns:cg="http://schemas.microsoft.com/ado/2006/04/codegeneration" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" Namespace="CoinMillionsModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" annotation:UseStrongSpatialTypes="false">
         <EntityContainer Name="CoinMillionsModelContainer" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Findings" EntityType="CoinMillionsModel.Finding" />
-          <AssociationSet Name="TicketTxFinding" Association="CoinMillionsModel.TicketTxFinding">
-            <End Role="TicketTx" EntitySet="TransactionDetails" />
-            <End Role="Finding" EntitySet="Findings" />
-          </AssociationSet>
           <EntitySet Name="Blocks" EntityType="CoinMillionsModel.Block" />
           <EntitySet Name="TransactionDetails" EntityType="CoinMillionsModel.TransactionDetail" />
           <AssociationSet Name="TransactionDetailBlock" Association="CoinMillionsModel.TransactionDetailBlock">
@@ -178,11 +258,29 @@
             <End Role="TicketTx" EntitySet="TransactionDetails" />
             <End Role="ChangeTx" EntitySet="TransactionDetails" />
           </AssociationSet>
+          <EntitySet Name="Tickets" EntityType="CoinMillionsModel.Ticket" />
+          <AssociationSet Name="TicketTxTicket" Association="CoinMillionsModel.TicketTxTicket">
+            <End Role="TicketTx" EntitySet="TransactionDetails" />
+            <End Role="Ticket" EntitySet="Tickets" />
+          </AssociationSet>
+          <AssociationSet Name="TicketFinding" Association="CoinMillionsModel.TicketFinding">
+            <End Role="Ticket" EntitySet="Tickets" />
+            <End Role="Finding" EntitySet="Findings" />
+          </AssociationSet>
+          <AssociationSet Name="DrawBlockTicket" Association="CoinMillionsModel.DrawBlockTicket">
+            <End Role="DrawBlock" EntitySet="Blocks" />
+            <End Role="Ticket" EntitySet="Tickets" />
+          </AssociationSet>
+          <AssociationSet Name="DrawBlockTicketTx" Association="CoinMillionsModel.DrawBlockTicketTx">
+            <End Role="DrawBlock" EntitySet="Blocks" />
+            <End Role="TicketTx" EntitySet="TransactionDetails" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="TicketTx" BaseType="CoinMillionsModel.TransactionDetail">
           <Property Type="String" Name="Sender" Nullable="false" />
-          <NavigationProperty Name="Findings" Relationship="CoinMillionsModel.TicketTxFinding" FromRole="TicketTx" ToRole="Finding" />
           <NavigationProperty Name="ChangeTx" Relationship="CoinMillionsModel.TicketTxChangeTx" FromRole="TicketTx" ToRole="ChangeTx" />
+          <NavigationProperty Name="Tickets" Relationship="CoinMillionsModel.TicketTxTicket" FromRole="TicketTx" ToRole="Ticket" />
+          <NavigationProperty Name="DrawBlock" Relationship="CoinMillionsModel.DrawBlockTicketTx" FromRole="TicketTx" ToRole="DrawBlock" />
         </EntityType>
         <EntityType Name="ChangeTx" BaseType="CoinMillionsModel.TransactionDetail">
           <Property Type="Boolean" Name="Validation" Nullable="false" />
@@ -197,12 +295,8 @@
           <Property Type="Int32" Name="Stars" Nullable="false" />
           <Property Type="Double" Name="Probability" Nullable="false" />
           <Property Type="Double" Name="Gain" Nullable="false" />
-          <NavigationProperty Name="TicketTx" Relationship="CoinMillionsModel.TicketTxFinding" FromRole="Finding" ToRole="TicketTx" />
+          <NavigationProperty Name="Ticket" Relationship="CoinMillionsModel.TicketFinding" FromRole="Finding" ToRole="Ticket" />
         </EntityType>
-        <Association Name="TicketTxFinding">
-          <End Type="CoinMillionsModel.TicketTx" Role="TicketTx" Multiplicity="*" />
-          <End Type="CoinMillionsModel.Finding" Role="Finding" Multiplicity="0..1" />
-        </Association>
         <EntityType Name="Block">
           <Key>
             <PropertyRef Name="ID" />
@@ -248,6 +342,36 @@
           <End Type="CoinMillionsModel.TicketTx" Role="TicketTx" Multiplicity="1" />
           <End Type="CoinMillionsModel.ChangeTx" Role="ChangeTx" Multiplicity="0..1" />
         </Association>
+        <EntityType Name="Ticket">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Type="Int32" Name="ID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="TicketString" Nullable="false" />
+          <NavigationProperty Name="TicketTx" Relationship="CoinMillionsModel.TicketTxTicket" FromRole="Ticket" ToRole="TicketTx" />
+          <NavigationProperty Name="Findings" Relationship="CoinMillionsModel.TicketFinding" FromRole="Ticket" ToRole="Finding" />
+          <NavigationProperty Name="DrawBlock" Relationship="CoinMillionsModel.DrawBlockTicket" FromRole="Ticket" ToRole="DrawBlock" />
+        </EntityType>
+        <Association Name="TicketTxTicket">
+          <End Type="CoinMillionsModel.TicketTx" Role="TicketTx" Multiplicity="1" />
+          <End Type="CoinMillionsModel.Ticket" Role="Ticket" Multiplicity="*" />
+        </Association>
+        <Association Name="TicketFinding">
+          <End Type="CoinMillionsModel.Ticket" Role="Ticket" Multiplicity="*" />
+          <End Type="CoinMillionsModel.Finding" Role="Finding" Multiplicity="0..1" />
+        </Association>
+        <EntityType Name="DrawBlock" BaseType="CoinMillionsModel.Block" >
+          <NavigationProperty Name="Tickets" Relationship="CoinMillionsModel.DrawBlockTicket" FromRole="DrawBlock" ToRole="Ticket" />
+          <NavigationProperty Name="TicketTxes" Relationship="CoinMillionsModel.DrawBlockTicketTx" FromRole="DrawBlock" ToRole="TicketTx" />
+        </EntityType>
+        <Association Name="DrawBlockTicket">
+          <End Type="CoinMillionsModel.DrawBlock" Role="DrawBlock" Multiplicity="0..1" />
+          <End Type="CoinMillionsModel.Ticket" Role="Ticket" Multiplicity="1" />
+        </Association>
+        <Association Name="DrawBlockTicketTx">
+          <End Type="CoinMillionsModel.DrawBlock" Role="DrawBlock" Multiplicity="0..1" />
+          <End Type="CoinMillionsModel.TicketTx" Role="TicketTx" Multiplicity="*" />
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -282,6 +406,11 @@
           <ScalarProperty Name="NextBlockHash" ColumnName="NextBlockHash" />
         </MappingFragment>
       </EntityTypeMapping>
+      <EntityTypeMapping TypeName="IsTypeOf(CoinMillionsModel.DrawBlock)">
+        <MappingFragment StoreEntitySet="Blocks_DrawBlock">
+          <ScalarProperty Name="ID" ColumnName="ID" />
+        </MappingFragment>
+      </EntityTypeMapping>
     </EntitySetMapping>
     <EntitySetMapping Name="TransactionDetails">
       <EntityTypeMapping TypeName="IsTypeOf(CoinMillionsModel.TransactionDetail)">
@@ -314,15 +443,14 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
-    <AssociationSetMapping Name="TicketTxFinding" TypeName="CoinMillionsModel.TicketTxFinding" StoreEntitySet="TransactionDetails_TicketTx">
-      <EndProperty Name="Finding">
-        <ScalarProperty Name="ID" ColumnName="Findings_ID" />
-      </EndProperty>
-      <EndProperty Name="TicketTx">
-        <ScalarProperty Name="ID" ColumnName="ID" />
-      </EndProperty>
-      <Condition ColumnName="Findings_ID" IsNull="false" />
-    </AssociationSetMapping>
+    <EntitySetMapping Name="Tickets">
+      <EntityTypeMapping TypeName="IsTypeOf(CoinMillionsModel.Ticket)">
+        <MappingFragment StoreEntitySet="Tickets">
+          <ScalarProperty Name="ID" ColumnName="ID" />
+          <ScalarProperty Name="TicketString" ColumnName="TicketString" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
     <AssociationSetMapping Name="TransactionDetailBlock" TypeName="CoinMillionsModel.TransactionDetailBlock" StoreEntitySet="TransactionDetails">
       <EndProperty Name="Block">
         <ScalarProperty Name="ID" ColumnName="Blocks_ID" />
@@ -339,6 +467,40 @@
       <EndProperty Name="ChangeTx">
         <ScalarProperty Name="ID" ColumnName="ID" />
       </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="TicketTxTicket" TypeName="CoinMillionsModel.TicketTxTicket" StoreEntitySet="Tickets">
+      <EndProperty Name="TicketTx">
+        <ScalarProperty Name="ID" ColumnName="TicketTx_ID" />
+      </EndProperty>
+      <EndProperty Name="Ticket">
+        <ScalarProperty Name="ID" ColumnName="ID" />
+      </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="TicketFinding" TypeName="CoinMillionsModel.TicketFinding" StoreEntitySet="Tickets">
+      <EndProperty Name="Finding">
+        <ScalarProperty Name="ID" ColumnName="Findings_ID" />
+      </EndProperty>
+      <EndProperty Name="Ticket">
+        <ScalarProperty Name="ID" ColumnName="ID" />
+      </EndProperty>
+      <Condition ColumnName="Findings_ID" IsNull="false" />
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="DrawBlockTicket" TypeName="CoinMillionsModel.DrawBlockTicket" StoreEntitySet="Blocks_DrawBlock">
+      <EndProperty Name="Ticket">
+        <ScalarProperty Name="ID" ColumnName="Tickets_ID" />
+      </EndProperty>
+      <EndProperty Name="DrawBlock">
+        <ScalarProperty Name="ID" ColumnName="ID" />
+      </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="DrawBlockTicketTx" TypeName="CoinMillionsModel.DrawBlockTicketTx" StoreEntitySet="TransactionDetails_TicketTx">
+      <EndProperty Name="DrawBlock">
+        <ScalarProperty Name="ID" ColumnName="DrawBlock_ID" />
+      </EndProperty>
+      <EndProperty Name="TicketTx">
+        <ScalarProperty Name="ID" ColumnName="ID" />
+      </EndProperty>
+      <Condition ColumnName="DrawBlock_ID" IsNull="false" />
     </AssociationSetMapping>
   </EntityContainerMapping>
 </Mapping></edmx:Mappings>

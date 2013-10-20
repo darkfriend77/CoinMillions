@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CoinMillionsServer.Wrapper;
 using MathNet.Numerics;
 using MathNet.Numerics.Distributions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace CoinMillions
@@ -190,6 +191,24 @@ namespace CoinMillions
             //                            Console.WriteLine("[ {0}, {1}, {2}, {3}, {4} ] [ {5}, {6}]", a, b, c, d, e, s, t);
             //                            Console.ReadKey();
             //                        }
+
+
+            JArray jArray = new JArray();
+            jArray.Add(1);
+            jArray.Add(2);
+            jArray.Add(3);
+            jArray.Add(4);
+            jArray.Add(5);
+
+            Console.WriteLine(jArray.ToString());
+
+
+
+            JArray jObject = (JArray)JsonConvert.DeserializeObject(jArray.ToString());
+
+            int[] result = jObject.ToObject<int[]>();
+
+            Console.WriteLine("{0} {1} {2} {3} {4}", result[0], result[1], result[2], result[3], result[4]);
 
             Console.ReadKey();
         }

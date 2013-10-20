@@ -104,7 +104,13 @@
     <Compile Include="Data\MethodName.cs" />
     <Compile Include="Data\RawTransaction.cs" />
     <Compile Include="Data\Transaction.cs" />
+    <Compile Include="DrawBlock.cs">
+      <DependentUpon>CoinMillionsModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Finding.cs">
+      <DependentUpon>CoinMillionsModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Ticket.cs">
       <DependentUpon>CoinMillionsModel.tt</DependentUpon>
     </Compile>
     <Compile Include="TicketTx.cs">

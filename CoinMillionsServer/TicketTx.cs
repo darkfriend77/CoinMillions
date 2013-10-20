@@ -14,9 +14,15 @@ namespace CoinMillionsServer
     
     public partial class TicketTx : TransactionDetail
     {
+        public TicketTx()
+        {
+            this.Tickets = new HashSet<Ticket>();
+        }
+    
         public string Sender { get; set; }
     
-        public virtual Finding Findings { get; set; }
         public virtual ChangeTx ChangeTx { get; set; }
+        public virtual ICollection<Ticket> Tickets { get; set; }
+        public virtual DrawBlock DrawBlock { get; set; }
     }
 }

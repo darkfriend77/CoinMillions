@@ -145,10 +145,23 @@ namespace CoinMillionsServer
             if (buildChangeTxFlag)
                 makeChangeTxs();
 
-            lblTicketsCount.Content = database.TransactionDetails.OfType<TicketTx>().Count();
-            lblChangesCount.Content = string.Format("{0} [{1}]", database.TransactionDetails.OfType<ChangeTx>().Where(t => t.Validation == true).Count(), database.TransactionDetails.OfType<ChangeTx>().Count());
+            lblTicketTxsCount.Content = database.TransactionDetails.OfType<TicketTx>().Count();
+            lblTicketsCount.Content = database.Tickets.Count();
+            lblChangeTxsCount.Content = string.Format("{0} [{1}]", database.TransactionDetails.OfType<ChangeTx>().Where(t => t.Validation == true).Count(), database.TransactionDetails.OfType<ChangeTx>().Count());
             lblBlocksCount.Content = database.Blocks.Count();
             lblAmount.Content = btc.GetBalance();
+
+            // do a draw
+            if (drawNextRndFlag)
+                doDrawNextRound();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void doDrawNextRound()
+        {
+
         }
 
         /// <summary>
@@ -330,6 +343,25 @@ namespace CoinMillionsServer
                         TimeReceived = transaction.TimeReceived,
                         TxId = transaction.TxId
                     };
+
+                    // TODO: add multiple ticket transactions
+
+                    // random ticket from transaction hash
+                    ticketTx.Tickets.Add(new Ticket()
+                    {
+                        TicketString = lottery.getTicketStringFromTicket(lottery.getTicketFromHash(ticketTx.TxId))
+                    });
+
+                    // personal ticket from transaction value
+                    int[] personalTicket;
+                    if (lottery.getTicketFromAmount(transaction.Amount, out personalTicket))
+                    {
+                        ticketTx.Tickets.Add(new Ticket()
+                        {
+                            TicketString = lottery.getTicketStringFromTicket(personalTicket)
+                        });
+                    }
+
                     database.TransactionDetails.Add(ticketTx);
                     database.SaveChanges();
                 }
@@ -358,7 +390,7 @@ namespace CoinMillionsServer
                 return false;
 
             int[] ticket = null;
-            if (!lottery.getTicketFromAmount(transaction.Amount, out ticket))
+            if (!lottery.getTicketFromAmount(transaction.Amount, out ticket) && transaction.Amount != ticketCost)
                 return false;
 
             return true;

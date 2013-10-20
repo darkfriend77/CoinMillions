@@ -28,5 +28,6 @@ namespace CoinMillionsServer
         public DbSet<Finding> Findings { get; set; }
         public DbSet<Block> Blocks { get; set; }
         public DbSet<TransactionDetail> TransactionDetails { get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
     }
 }
