@@ -30,7 +30,9 @@ namespace CoinMillionsServer
         private const double ticketCost = 0.01;
         private const double networkFee = 0.0001;
         private const int updateFrequency = 100;
-
+        private const int transactionConfirmations = 6;
+        private const double balanceDrawAmount = 0;
+        private const int ticketDrawAmount = 10;
 
         private int tickCount;
         private double startTime;
@@ -161,7 +163,21 @@ namespace CoinMillionsServer
         /// </summary>
         private void doDrawNextRound()
         {
+            if (!isValidDrawRound())
+                return;
+        }
 
+        private bool isValidDrawRound()
+        {
+            if (balanceDrawAmount > 0 && actualInfo.Balance < balanceDrawAmount)
+                return false;
+
+            int validTicket = database.TransactionDetails.OfType<ChangeTx>().Where(t => t.Validation == true).Count();
+            if (ticketDrawAmount > 0 && validTicket < ticketDrawAmount)
+                return false;
+
+            AddLine("We've a valid draw round incoming now! (Balance: {0}) (Tickets: {1})!", actualInfo.Balance, validTicket);
+            return true;
         }
 
         /// <summary>
@@ -207,7 +223,7 @@ namespace CoinMillionsServer
 
 
                     }
-                    else if (!changeTx.Validation && transaction.Confirmations > 0)
+                    else if (!changeTx.Validation && transaction.Confirmations >= transactionConfirmations)
                     {
                         // fill the missing values ...
                         Block block = btc.GetBlock(transaction.BlockHash);
@@ -261,6 +277,7 @@ namespace CoinMillionsServer
             //{
 
             TicketTx ticketTx = database.TransactionDetails.OfType<TicketTx>().Where(t => t.ChangeTx == null).FirstOrDefault();
+            
             if (ticketTx == null)
                 return;
 
