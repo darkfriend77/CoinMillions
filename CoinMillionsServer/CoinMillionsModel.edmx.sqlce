@@ -2,7 +2,7 @@
 -- --------------------------------------------------
 -- Entity Designer DDL Script for SQL Server Compact Edition
 -- --------------------------------------------------
--- Date Created: 10/20/2013 16:07:00
+-- Date Created: 10/27/2013 20:16:54
 -- Generated from EDMX file: D:\Bitcoin\Projects\CoinMillions\CoinMillionsServer\CoinMillionsModel.edmx
 -- --------------------------------------------------
 
@@ -61,7 +61,7 @@ CREATE TABLE [Blocks] (
     [Bits] nvarchar(4000)  NOT NULL,
     [Difficulty] real  NOT NULL,
     [PreviousBlockHash] nvarchar(4000)  NOT NULL,
-    [NextBlockHash] nvarchar(4000)  NOT NULL
+    [NextBlockHash] nvarchar(4000)  NULL
 );
 
 -- Creating table 'TransactionDetails'
@@ -72,7 +72,7 @@ CREATE TABLE [TransactionDetails] (
     [Category] nvarchar(4000)  NOT NULL,
     [Amount] float  NOT NULL,
     [Confirmations] int  NOT NULL,
-    [BlockHash] nvarchar(4000)  NOT NULL,
+    [BlockHash] nvarchar(4000)  NULL,
     [BlockIndex] int  NOT NULL,
     [BlockTime] int  NOT NULL,
     [TxId] nvarchar(4000)  NOT NULL,

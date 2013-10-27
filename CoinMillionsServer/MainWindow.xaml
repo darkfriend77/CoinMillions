@@ -7,7 +7,7 @@
                      VerticalScrollBarVisibility="Visible" 
                      HorizontalScrollBarVisibility="Visible" 
                      IsReadOnly="True" Margin="0,200,0,0" Padding="0" FontFamily="Lucida Console" FontSize="10"/>
-        <ProgressBar x:Name="progressBar1" Height="40" Margin="0,155,0,170" Padding="0" Width="750"/>
+        <ProgressBar x:Name="progressBar1" Height="40" Margin="0,158,0,172" Padding="0"/>
         <Label Content="TicketTxs:" HorizontalAlignment="Left" Margin="253,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.404,-0.993" Foreground="White"/>
         <Label x:Name="lblTicketTxsCount" Content="#" HorizontalAlignment="Left" Margin="323,10,0,0" VerticalAlignment="Top" Foreground="Lime" RenderTransformOrigin="1.5,0.5"/>
         <Label x:Name="lblAmount" Content="#" HorizontalAlignment="Left" Margin="100,36,0,0" VerticalAlignment="Top" Foreground="Lime"/>

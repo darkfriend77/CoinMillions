@@ -31,8 +31,9 @@ namespace CoinMillionsServer
         private const double networkFee = 0.0001;
         private const int updateFrequency = 100;
         private const int transactionConfirmations = 6;
-        private const double balanceDrawAmount = 0;
-        private const int ticketDrawAmount = 10;
+        private double balanceDrawAmount = 0;
+        private int ticketDrawAmount = 5;
+        private int blockDrawSpacer = 1; // TODO: check if needed
 
         private int tickCount;
         private double startTime;
@@ -107,7 +108,7 @@ namespace CoinMillionsServer
 
             // actualize network informations for the tick
             actualInfo = btc.GetInfo();
-            actualDraw = lottery.getTicketFromHash(btc.GetBlockhash(actualInfo.Blocks));
+            actualDraw = lottery.getTicketFromHash(btc.GetBlock(btc.GetBlockhash(actualInfo.Blocks)).MerkleRoot);
 
             lblActBlock.Content = actualInfo.Blocks.ToString("N0") + " [" + (2016 - (actualInfo.Blocks % 2016)) + "]";
             lblDifficulty.Content = actualInfo.Difficulty.ToString("N0");
@@ -135,7 +136,7 @@ namespace CoinMillionsServer
 
             //timer.IsEnabled = false;
 
-            // check for paytime
+            // TODO: check for paytime
 
             // check for new ticket transactions
             getTicketTxs(allTransactions);
@@ -156,6 +157,8 @@ namespace CoinMillionsServer
             // do a draw
             if (drawNextRndFlag)
                 doDrawNextRound();
+
+            // TODO: add block information updater
         }
 
         /// <summary>
@@ -163,10 +166,74 @@ namespace CoinMillionsServer
         /// </summary>
         private void doDrawNextRound()
         {
-            if (!isValidDrawRound())
+            Block block;
+            if (!isValidDrawRound() || !getValidDrawBlock(out block))
                 return;
+
+            AddLine("We've a valid block! (Block: {0})", block.Hash);
+
+            int[] drawTicket = lottery.getTicketFromHash(block.MerkleRoot);
+
+
+            foreach (TicketTx ticketTx in database.TransactionDetails.OfType<TicketTx>())
+            {
+                int pN, sN;
+                AddLine("+ TicketTx[{0}] -------------------------- ", ticketTx.ID);
+
+                int[] personalTicket;
+                if (lottery.getTicketFromAmount(ticketTx.Amount, out personalTicket))
+                {
+                    int[] personalArray = lottery.compareTicket(drawTicket, personalTicket);
+                    pN = personalArray[0];
+                    sN = personalArray[1];
+                    Finding personalFinding = database.Findings.Where(s => s.Numbers == pN && s.Stars == sN).First();
+                    AddLine("  + Pers.: {0}", lottery.getArrayToString(personalTicket));
+                    AddLine("    + Number: {0}, Star: {1}, Probability: {2}, Gain: {3}", personalFinding.Numbers, personalFinding.Stars, personalFinding.Probability, personalFinding.Gain);
+                    AddLine("    + Wining: {0} BTC!", String.Format("{0:0.########}",personalFinding.Gain * actualInfo.Balance));
+                }
+
+                int[] randomTicket = lottery.getTicketFromHash(ticketTx.TxId);
+                int[] RandomArray = lottery.compareTicket(drawTicket, randomTicket);
+                pN = RandomArray[0];
+                sN = RandomArray[1];
+                Finding randomFinding = database.Findings.Where(s => s.Numbers == pN && s.Stars == sN).First();
+
+                AddLine("  + Rand.: {0}", lottery.getArrayToString(randomTicket));
+                AddLine("    + Number: {0}, Star: {1}, Probability: {2}, Gain: {3}", randomFinding.Numbers, randomFinding.Stars, randomFinding.Probability, randomFinding.Gain);
+                AddLine("    + Wining: {0} BTC!", String.Format("{0:0.########}", randomFinding.Gain * actualInfo.Balance));
+            }
+
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="block"></param>
+        /// <returns></returns>
+        private bool getValidDrawBlock(out Block block)
+        {
+            block = null;
+            TicketTx ticket = database.TransactionDetails.OfType<TicketTx>()
+                .Where(t => t.DrawBlock == null)
+                .OrderByDescending(t => t.BlockIndex).FirstOrDefault();
+
+            if (actualInfo.Blocks <= ticket.BlockIndex)
+                return false;
+
+            Block checkBlock = btc.GetBlock(btc.GetBlockhash(ticket.BlockIndex + blockDrawSpacer));
+
+            if (checkBlock.Confirmations < 6)
+                return false;
+
+            block = checkBlock;
+
+            return true;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private bool isValidDrawRound()
         {
             if (balanceDrawAmount > 0 && actualInfo.Balance < balanceDrawAmount)
@@ -335,13 +402,15 @@ namespace CoinMillionsServer
                 int payeeVoutN;
                 double payeeVoutValue;
 
-                bool duplicate = database.TransactionDetails.OfType<TicketTx>().Any(t => t.TxId == transaction.TxId);
+                TicketTx duplicate = database.TransactionDetails.OfType<TicketTx>().FirstOrDefault(t => t.TxId == transaction.TxId);
 
-                if (isValidTicketTx(transaction) && !duplicate && btc.DeepTransactionInfo(transaction.TxId, out changeVoutAdress, out payeeVoutAdress, out payeeVoutN, out payeeVoutValue))
+                if (isValidTicketTx(transaction) && duplicate == null && btc.DeepTransactionInfo(transaction.TxId, out changeVoutAdress, out payeeVoutAdress, out payeeVoutN, out payeeVoutValue))
                 {
-                    AddLine("Valid Ticket: {0}", transaction.TxId);
+                    AddLine("Valid Ticket: {0} Block: {1}", transaction.TxId, transaction.BlockHash);
 
-                    Block block = btc.GetBlock(transaction.BlockHash);
+                    Block block = null;
+                    if (transaction.BlockHash != null)
+                        block = btc.GetBlock(transaction.BlockHash);
 
                     TicketTx ticketTx = new TicketTx()
                     {
@@ -381,6 +450,17 @@ namespace CoinMillionsServer
 
                     database.TransactionDetails.Add(ticketTx);
                     database.SaveChanges();
+                }
+                else if (duplicate != null && duplicate.BlockHash == null)
+                {
+                    Transaction duplicateTransaction = btc.GetTransaction(duplicate.TxId);
+                    if (duplicateTransaction.BlockHash != string.Empty)
+                    {
+                        AddLine("Block to Ticket: {0}", transaction.TxId);
+
+                        duplicate.Blocks = btc.GetBlock(transaction.BlockHash);
+                        database.SaveChanges();
+                    }
                 }
                 //else
                 //    AddLine("Invalid Ticket: {0}, Duplicate: {1}", transaction.TxId, duplicate);

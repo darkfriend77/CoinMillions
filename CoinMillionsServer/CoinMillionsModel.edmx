@@ -75,7 +75,7 @@
     <Property Name="Bits" Type="nvarchar" Nullable="false" />
     <Property Name="Difficulty" Type="real" Nullable="false" />
     <Property Name="PreviousBlockHash" Type="nvarchar" Nullable="false" />
-    <Property Name="NextBlockHash" Type="nvarchar" Nullable="false" />
+    <Property Name="NextBlockHash" Type="nvarchar" Nullable="true" />
   </EntityType>
   <EntityType Name="TransactionDetails">
     <Key>
@@ -87,7 +87,7 @@
     <Property Name="Category" Type="nvarchar" Nullable="false" />
     <Property Name="Amount" Type="float" Nullable="false" />
     <Property Name="Confirmations" Type="int" Nullable="false" />
-    <Property Name="BlockHash" Type="nvarchar" Nullable="false" />
+    <Property Name="BlockHash" Type="nvarchar" Nullable="true" />
     <Property Name="BlockIndex" Type="int" Nullable="false" />
     <Property Name="BlockTime" Type="int" Nullable="false" />
     <Property Name="TxId" Type="nvarchar" Nullable="false" />
@@ -312,7 +312,7 @@
           <Property Type="String" Name="Bits" Nullable="false" />
           <Property Type="Single" Name="Difficulty" Nullable="false" />
           <Property Type="String" Name="PreviousBlockHash" Nullable="false" />
-          <Property Type="String" Name="NextBlockHash" Nullable="false" />
+          <Property Type="String" Name="NextBlockHash" Nullable="true" />
           <NavigationProperty Name="TransactionDetail" Relationship="CoinMillionsModel.TransactionDetailBlock" FromRole="Block" ToRole="TransactionDetail" />
         </EntityType>
         <EntityType Name="TransactionDetail" Abstract="false">
@@ -325,7 +325,7 @@
           <Property Type="String" Name="Category" Nullable="false" />
           <Property Type="Double" Name="Amount" Nullable="false" />
           <Property Type="Int32" Name="Confirmations" Nullable="false" />
-          <Property Type="String" Name="BlockHash" Nullable="false" />
+          <Property Type="String" Name="BlockHash" Nullable="true" />
           <Property Type="Int32" Name="BlockIndex" Nullable="false" />
           <Property Type="Int32" Name="BlockTime" Nullable="false" />
           <Property Type="String" Name="TxId" Nullable="false" />
