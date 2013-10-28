@@ -19,6 +19,8 @@ namespace CoinMillionsServer
             this.TicketTxes = new HashSet<TicketTx>();
         }
     
+        public double Pot { get; set; }
+        public string State { get; set; }
     
         public virtual Ticket Tickets { get; set; }
         public virtual ICollection<TicketTx> TicketTxes { get; set; }

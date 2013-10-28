@@ -32,7 +32,7 @@ namespace CoinMillionsServer
         private const int updateFrequency = 100;
         private const int transactionConfirmations = 6;
         private double balanceDrawAmount = 0;
-        private int ticketDrawAmount = 5;
+        private int ticketDrawAmount = 4;
         private int blockDrawSpacer = 1; // TODO: check if needed
 
         private int tickCount;
@@ -170,38 +170,87 @@ namespace CoinMillionsServer
             if (!isValidDrawRound() || !getValidDrawBlock(out block))
                 return;
 
-            AddLine("We've a valid block! (Block: {0})", block.Hash);
+            AddLine("We've a valid block! (Block: {0})", smallHashTag(block.Hash));
+            //AddLine("BlockHeight: {0})", block.Height);
+            //int[] drawTicket = lottery.getTicketFromHash(block.MerkleRoot);
+            //TicketTx ticket = database.TransactionDetails.OfType<TicketTx>()
+            //    .Where(t => t.DrawBlock == null)
+            //    .OrderByDescending(t => t.BlockIndex).FirstOrDefault();
+            //AddLine("ticket.BlockIndex: {0})", ticket.BlockIndex);
+
+            DrawBlock drawBlock = new DrawBlock()
+            {
+                Bits = block.Bits,
+                Confirmations = block.Confirmations,
+                Difficulty = block.Difficulty,
+                Hash = block.Hash,
+                Height = block.Height,
+                MerkleRoot = block.MerkleRoot,
+                NextBlockHash = block.NextBlockHash,
+                Nonce = block.Nonce,
+                Pot = 0,
+                PreviousBlockHash = block.PreviousBlockHash,
+                Time = block.Time,
+                Version = block.Version
+            };
 
             int[] drawTicket = lottery.getTicketFromHash(block.MerkleRoot);
 
-
-            foreach (TicketTx ticketTx in database.TransactionDetails.OfType<TicketTx>())
+            drawBlock.Tickets = new Ticket()
             {
-                int pN, sN;
-                AddLine("+ TicketTx[{0}] -------------------------- ", ticketTx.ID);
+                TicketString = lottery.getTicketStringFromTicket(drawTicket)
+            };
 
-                int[] personalTicket;
-                if (lottery.getTicketFromAmount(ticketTx.Amount, out personalTicket))
+            drawBlock.State = "processing";
+
+            //AddLine("Block[{0}]: Height = {1}", smallHashTag(drawBlock.Hash), drawBlock.Height);
+
+            foreach (TicketTx ticketTx in database.TransactionDetails.OfType<TicketTx>().Where(t => t.DrawBlock == null && t.BlockIndex <= (drawBlock.Height - blockDrawSpacer)))
+            {
+                drawBlock.TicketTxes.Add(ticketTx);
+
+                foreach (Ticket ticket in ticketTx.Tickets)
                 {
-                    int[] personalArray = lottery.compareTicket(drawTicket, personalTicket);
-                    pN = personalArray[0];
-                    sN = personalArray[1];
-                    Finding personalFinding = database.Findings.Where(s => s.Numbers == pN && s.Stars == sN).First();
-                    AddLine("  + Pers.: {0}", lottery.getArrayToString(personalTicket));
-                    AddLine("    + Number: {0}, Star: {1}, Probability: {2}, Gain: {3}", personalFinding.Numbers, personalFinding.Stars, personalFinding.Probability, personalFinding.Gain);
-                    AddLine("    + Wining: {0} BTC!", String.Format("{0:0.########}",personalFinding.Gain * actualInfo.Balance));
+                    int[] numbersAndStars = lottery.compareTicket(drawTicket, lottery.getTicketFromTicketString(ticket.TicketString));
+                    int pN = numbersAndStars[0];
+                    int sN = numbersAndStars[1];
+                    ticket.Findings = database.Findings.Where(s => s.Numbers == pN && s.Stars == sN).First();
+                    AddLine("ticket[{0}]: -> {2} N - {3} S", ticket.ID, ticket.TicketString, ticket.Findings.Numbers, ticket.Findings.Stars);
                 }
-
-                int[] randomTicket = lottery.getTicketFromHash(ticketTx.TxId);
-                int[] RandomArray = lottery.compareTicket(drawTicket, randomTicket);
-                pN = RandomArray[0];
-                sN = RandomArray[1];
-                Finding randomFinding = database.Findings.Where(s => s.Numbers == pN && s.Stars == sN).First();
-
-                AddLine("  + Rand.: {0}", lottery.getArrayToString(randomTicket));
-                AddLine("    + Number: {0}, Star: {1}, Probability: {2}, Gain: {3}", randomFinding.Numbers, randomFinding.Stars, randomFinding.Probability, randomFinding.Gain);
-                AddLine("    + Wining: {0} BTC!", String.Format("{0:0.########}", randomFinding.Gain * actualInfo.Balance));
+                
+                //AddLine("ticketTx[{0}]: from Block[{1}]", smallHashTag(ticketTx.TxId), ticketTx.BlockIndex);
             }
+
+            database.Blocks.Add(drawBlock);
+            database.SaveChanges();
+
+            //foreach (TicketTx ticketTx in database.TransactionDetails.OfType<TicketTx>())
+            //{
+            //    int pN, sN;
+            //    AddLine("+ TicketTx[{0}] -------------------------- ", ticketTx.ID);
+
+            //    int[] personalTicket;
+            //    if (lottery.getTicketFromAmount(ticketTx.Amount, out personalTicket))
+            //    {
+            //        int[] personalArray = lottery.compareTicket(drawTicket, personalTicket);
+            //        pN = personalArray[0];
+            //        sN = personalArray[1];
+            //        Finding personalFinding = database.Findings.Where(s => s.Numbers == pN && s.Stars == sN).First();
+            //        AddLine("  + Pers.: {0}", lottery.getArrayToString(personalTicket));
+            //        AddLine("    + Number: {0}, Star: {1}, Probability: {2}, Gain: {3}", personalFinding.Numbers, personalFinding.Stars, personalFinding.Probability, personalFinding.Gain);
+            //        AddLine("    + Wining: {0} BTC!", String.Format("{0:0.########}", personalFinding.Gain * actualInfo.Balance));
+            //    }
+
+            //    int[] randomTicket = lottery.getTicketFromHash(ticketTx.TxId);
+            //    int[] RandomArray = lottery.compareTicket(drawTicket, randomTicket);
+            //    pN = RandomArray[0];
+            //    sN = RandomArray[1];
+            //    Finding randomFinding = database.Findings.Where(s => s.Numbers == pN && s.Stars == sN).First();
+
+            //    AddLine("  + Rand.: {0}", lottery.getArrayToString(randomTicket));
+            //    AddLine("    + Number: {0}, Star: {1}, Probability: {2}, Gain: {3}", randomFinding.Numbers, randomFinding.Stars, randomFinding.Probability, randomFinding.Gain);
+            //    AddLine("    + Wining: {0} BTC!", String.Format("{0:0.########}", randomFinding.Gain * actualInfo.Balance));
+            //}
 
         }
 
@@ -236,9 +285,12 @@ namespace CoinMillionsServer
         /// <returns></returns>
         private bool isValidDrawRound()
         {
-            if (balanceDrawAmount > 0 && actualInfo.Balance < balanceDrawAmount)
+
+            double balanceAmount = database.TransactionDetails.OfType<TicketTx>().Where(t => t.DrawBlock == null).Sum(t => t.Amount);
+            if (balanceDrawAmount > 0 && balanceAmount < balanceDrawAmount)
                 return false;
 
+            // TODO: check if this validation is correct approach
             int validTicket = database.TransactionDetails.OfType<ChangeTx>().Where(t => t.Validation == true).Count();
             if (ticketDrawAmount > 0 && validTicket < ticketDrawAmount)
                 return false;
@@ -286,7 +338,7 @@ namespace CoinMillionsServer
 
                         ticketTx.ChangeTx = changeTx;
                         database.SaveChanges();
-                        AddLine("ChangeTx[{0}]: Found new changeTx!", transaction.TxId);
+                        AddLine("ChangeTx[{0}]: Found new changeTx!", smallHashTag(transaction.TxId));
 
 
                     }
@@ -299,7 +351,7 @@ namespace CoinMillionsServer
                         changeTx.Validation = true;
 
                         database.SaveChanges();
-                        AddLine("ChangeTx[{0}]: Validation okay!", transaction.TxId);
+                        AddLine("ChangeTx[{0}]: Validation okay!", smallHashTag(transaction.TxId));
                     }
                 }
             }
@@ -344,48 +396,34 @@ namespace CoinMillionsServer
             //{
 
             TicketTx ticketTx = database.TransactionDetails.OfType<TicketTx>().Where(t => t.ChangeTx == null).FirstOrDefault();
-            
+
             if (ticketTx == null)
                 return;
 
-            string rawTransaction;
-            if (btc.CreateZeroConfirmationTransaction(ticketTx.TxId, ticketCost, networkFee, out rawTransaction))
+            double networkFeeTx = networkFee;
+            double amountToKeepTx = ticketCost;
+            if (ticketTx.Amount == ticketCost)
             {
-                AddLine("rawTransaction[{0}]: {1}", ticketTx.TxId, true);
-                SignedRawTransaction signrawtransaction = btc.SignRawTransaction(rawTransaction);
-                AddLine("signedRawTransaction[{0}]: {1}", ticketTx.TxId, signrawtransaction.Complete);
-                if (signrawtransaction.Complete)
-                {
-
-                    // TODO ... need to check if it was successful !!!
-                    string changeTxId = btc.SendRawTransaction(signrawtransaction.Hex);
-
-                    //ChangeTx changeTx = new ChangeTx()
-                    //{
-                    //    Account = "",
-                    //    Address = "",
-                    //    Amount = 0.0,
-                    //    BlockHash = "",
-                    //    BlockIndex = 0,
-                    //    BlockTime = 0,
-                    //    Category = "",
-                    //    Confirmations = 0,
-                    //    Fee = 0,
-                    //    Time = 0,
-                    //    TimeReceived = 0,
-                    //    TxId = changeTxId,
-                    //    Validation = false
-                    //};
-
-                    AddLine("changeTxId[{0}]: {1}", ticketTx.TxId, changeTxId);
-                    //ticketTx.ChangeTx = changeTx;
-                    //database.SaveChanges();
-                }
-                else
-                    AddLine("signedRawTransaction[{0}]: {1}", "not completed!");
+                AddLine("We've a single ticket transaction ....");
+                networkFeeTx = networkFee / 2;
+                amountToKeepTx = ticketCost - networkFeeTx;
             }
 
-            //}
+            string rawTransaction;
+            if (btc.CreateZeroConfirmationTransaction(ticketTx.TxId, amountToKeepTx, networkFeeTx, out rawTransaction))
+            {
+                AddLine("rawTransaction[{0}]: {1}", smallHashTag(ticketTx.TxId), true);
+                SignedRawTransaction signrawtransaction = btc.SignRawTransaction(rawTransaction);
+                AddLine("signedRawTransaction[{0}]: {1}", smallHashTag(ticketTx.TxId), signrawtransaction.Complete);
+
+                if (!signrawtransaction.Complete)
+                    AddLine("signedRawTransaction[{0}]: {1}", smallHashTag(ticketTx.TxId), "not completed!");
+
+                // TODO ... need to check if it was successful !!!
+                string changeTxId = btc.SendRawTransaction(signrawtransaction.Hex);
+
+                AddLine("changeTxId[{0}]: {1}", smallHashTag(ticketTx.TxId), smallHashTag(changeTxId));
+            }
         }
 
         /// <summary>
@@ -406,7 +444,7 @@ namespace CoinMillionsServer
 
                 if (isValidTicketTx(transaction) && duplicate == null && btc.DeepTransactionInfo(transaction.TxId, out changeVoutAdress, out payeeVoutAdress, out payeeVoutN, out payeeVoutValue))
                 {
-                    AddLine("Valid Ticket: {0} Block: {1}", transaction.TxId, transaction.BlockHash);
+                    AddLine("Valid Ticket: {0} Block: {1}", smallHashTag(transaction.TxId), smallHashTag(transaction.BlockHash));
 
                     Block block = null;
                     if (transaction.BlockHash != null)
@@ -581,6 +619,13 @@ namespace CoinMillionsServer
         {
             drawNextRndFlag = (bool)chBxDrawRnd.IsChecked;
             AddLine("Draw next rnd.? {0}", drawNextRndFlag);
+        }
+
+        private string smallHashTag(string hash)
+        {
+            if (hash.Length < 10)
+                return hash;
+            return hash.Substring(0, 5) + hash.Substring(hash.Length - 5, 5);
         }
 
     }
