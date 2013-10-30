@@ -20,6 +20,7 @@ namespace CoinMillionsServer
         }
     
         public string Sender { get; set; }
+        public State State { get; set; }
     
         public virtual ChangeTx ChangeTx { get; set; }
         public virtual ICollection<Ticket> Tickets { get; set; }

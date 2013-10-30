@@ -2,7 +2,7 @@
 -- --------------------------------------------------
 -- Entity Designer DDL Script for SQL Server Compact Edition
 -- --------------------------------------------------
--- Date Created: 10/28/2013 16:00:47
+-- Date Created: 10/30/2013 11:59:41
 -- Generated from EDMX file: C:\Bitcoin\Projects\CoinMillions\CoinMillionsServer\CoinMillionsModel.edmx
 -- --------------------------------------------------
 
@@ -105,6 +105,7 @@ CREATE TABLE [TransactionDetails] (
 CREATE TABLE [Tickets] (
     [ID] int IDENTITY(1,1) NOT NULL,
     [TicketString] nvarchar(4000)  NOT NULL,
+    [State] int  NOT NULL,
     [TicketTx_ID] int  NULL,
     [Findings_ID] int  NULL
 );
@@ -113,6 +114,7 @@ CREATE TABLE [Tickets] (
 -- Creating table 'TransactionDetails_TicketTx'
 CREATE TABLE [TransactionDetails_TicketTx] (
     [Sender] nvarchar(4000)  NOT NULL,
+    [State] int  NOT NULL,
     [ID] int  NOT NULL,
     [DrawBlock_ID] int  NULL
 );
@@ -121,6 +123,7 @@ CREATE TABLE [TransactionDetails_TicketTx] (
 -- Creating table 'TransactionDetails_ChangeTx'
 CREATE TABLE [TransactionDetails_ChangeTx] (
     [Validation] bit  NOT NULL,
+    [State] int  NOT NULL,
     [ID] int  NOT NULL,
     [TicketTx_ID] int  NOT NULL
 );
@@ -129,7 +132,7 @@ CREATE TABLE [TransactionDetails_ChangeTx] (
 -- Creating table 'Blocks_DrawBlock'
 CREATE TABLE [Blocks_DrawBlock] (
     [Pot] float  NOT NULL,
-    [State] nvarchar(4000)  NOT NULL,
+    [State] int  NOT NULL,
     [ID] int  NOT NULL,
     [Tickets_ID] int  NOT NULL
 );

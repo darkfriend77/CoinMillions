@@ -102,6 +102,7 @@
     </Key>
     <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="TicketString" Type="nvarchar" Nullable="false" />
+    <Property Name="State" Type="int" Nullable="false" />
     <Property Name="TicketTx_ID" Type="int" Nullable="true" />
     <Property Name="Findings_ID" Type="int" Nullable="true" />
   </EntityType>
@@ -110,6 +111,7 @@
       <PropertyRef Name="ID" />
     </Key>
     <Property Name="Sender" Type="nvarchar" Nullable="false" />
+    <Property Name="State" Type="int" Nullable="false" />
     <Property Name="ID" Type="int" Nullable="false" />
     <Property Name="DrawBlock_ID" Type="int" Nullable="true" />
   </EntityType>
@@ -118,6 +120,7 @@
       <PropertyRef Name="ID" />
     </Key>
     <Property Name="Validation" Type="bit" Nullable="false" />
+    <Property Name="State" Type="int" Nullable="false" />
     <Property Name="ID" Type="int" Nullable="false" />
     <Property Name="TicketTx_ID" Type="int" Nullable="false" />
   </EntityType>
@@ -126,7 +129,7 @@
       <PropertyRef Name="ID" />
     </Key>
     <Property Name="Pot" Type="float" Nullable="false" />
-    <Property Name="State" Type="nvarchar" Nullable="false" />
+    <Property Name="State" Type="int" Nullable="false" />
     <Property Name="ID" Type="int" Nullable="false" />
     <Property Name="Tickets_ID" Type="int" Nullable="false" />
   </EntityType>
@@ -283,10 +286,12 @@
           <NavigationProperty Name="ChangeTx" Relationship="CoinMillionsModel.TicketTxChangeTx" FromRole="TicketTx" ToRole="ChangeTx" />
           <NavigationProperty Name="Tickets" Relationship="CoinMillionsModel.TicketTxTicket" FromRole="TicketTx" ToRole="Ticket" />
           <NavigationProperty Name="DrawBlock" Relationship="CoinMillionsModel.DrawBlockTicketTx" FromRole="TicketTx" ToRole="DrawBlock" />
+          <Property Type="CoinMillionsModel.State" Name="State" Nullable="false" />
         </EntityType>
         <EntityType Name="ChangeTx" BaseType="CoinMillionsModel.TransactionDetail">
           <Property Type="Boolean" Name="Validation" Nullable="false" />
           <NavigationProperty Name="TicketTx" Relationship="CoinMillionsModel.TicketTxChangeTx" FromRole="ChangeTx" ToRole="TicketTx" />
+          <Property Type="CoinMillionsModel.State" Name="State" Nullable="false" />
         </EntityType>
         <EntityType Name="Finding">
           <Key>
@@ -353,6 +358,7 @@
           <NavigationProperty Name="TicketTx" Relationship="CoinMillionsModel.TicketTxTicket" FromRole="Ticket" ToRole="TicketTx" />
           <NavigationProperty Name="Findings" Relationship="CoinMillionsModel.TicketFinding" FromRole="Ticket" ToRole="Finding" />
           <NavigationProperty Name="DrawBlock" Relationship="CoinMillionsModel.DrawBlockTicket" FromRole="Ticket" ToRole="DrawBlock" />
+          <Property Type="CoinMillionsModel.State" Name="State" Nullable="false" />
         </EntityType>
         <Association Name="TicketTxTicket">
           <End Type="CoinMillionsModel.TicketTx" Role="TicketTx" Multiplicity="0..1" />
@@ -366,7 +372,7 @@
           <NavigationProperty Name="Tickets" Relationship="CoinMillionsModel.DrawBlockTicket" FromRole="DrawBlock" ToRole="Ticket" />
           <NavigationProperty Name="TicketTxes" Relationship="CoinMillionsModel.DrawBlockTicketTx" FromRole="DrawBlock" ToRole="TicketTx" />
           <Property Type="Double" Name="Pot" Nullable="false" />
-          <Property Type="String" Name="State" Nullable="false" />
+          <Property Type="CoinMillionsModel.State" Name="State" Nullable="false" />
         </EntityType>
         <Association Name="DrawBlockTicket">
           <End Type="CoinMillionsModel.DrawBlock" Role="DrawBlock" Multiplicity="0..1" />
@@ -376,6 +382,15 @@
           <End Type="CoinMillionsModel.DrawBlock" Role="DrawBlock" Multiplicity="0..1" />
           <End Type="CoinMillionsModel.TicketTx" Role="TicketTx" Multiplicity="*" />
         </Association>
+        <EnumType Name="State">
+          <Member Name="None" />
+          <Member Name="Open" />
+          <Member Name="Valid" />
+          <Member Name="Close" />
+          <Member Name="Process" />
+          <Member Name="Assign" />
+          <Member Name="Invalid" />
+        </EnumType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -440,12 +455,14 @@
         <MappingFragment StoreEntitySet="TransactionDetails_TicketTx">
           <ScalarProperty Name="ID" ColumnName="ID" />
           <ScalarProperty Name="Sender" ColumnName="Sender" />
+          <ScalarProperty Name="State" ColumnName="State" />
         </MappingFragment>
       </EntityTypeMapping>
       <EntityTypeMapping TypeName="IsTypeOf(CoinMillionsModel.ChangeTx)">
         <MappingFragment StoreEntitySet="TransactionDetails_ChangeTx">
           <ScalarProperty Name="ID" ColumnName="ID" />
           <ScalarProperty Name="Validation" ColumnName="Validation" />
+          <ScalarProperty Name="State" ColumnName="State" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -454,6 +471,7 @@
         <MappingFragment StoreEntitySet="Tickets">
           <ScalarProperty Name="ID" ColumnName="ID" />
           <ScalarProperty Name="TicketString" ColumnName="TicketString" />
+          <ScalarProperty Name="State" ColumnName="State" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

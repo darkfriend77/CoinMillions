@@ -10,19 +10,15 @@
 namespace CoinMillionsServer
 {
     using System;
-    using System.Collections.Generic;
     
-    public partial class DrawBlock : Block
+    public enum State : int
     {
-        public DrawBlock()
-        {
-            this.TicketTxes = new HashSet<TicketTx>();
-        }
-    
-        public double Pot { get; set; }
-        public State State { get; set; }
-    
-        public virtual Ticket Tickets { get; set; }
-        public virtual ICollection<TicketTx> TicketTxes { get; set; }
+        None = 0,
+        Open = 1,
+        Valid = 2,
+        Close = 3,
+        Process = 4,
+        Assign = 5,
+        Invalid = 6
     }
 }

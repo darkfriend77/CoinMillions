@@ -15,6 +15,7 @@ namespace CoinMillionsServer
     public partial class ChangeTx : TransactionDetail
     {
         public bool Validation { get; set; }
+        public State State { get; set; }
     
         public virtual TicketTx TicketTx { get; set; }
     }
