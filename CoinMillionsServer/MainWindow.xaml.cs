@@ -148,7 +148,7 @@ namespace CoinMillionsServer
             if (buildChangeTxFlag)
                 makeChangeTxs();
 
-            lblTicketTxsCount.Content = database.TransactionDetails.OfType<TicketTx>().Count();
+            lblTicketTxsCount.Content = getTransactionOfType(Type.Ticket).Count();
             lblTicketsCount.Content = database.Tickets.Count();
             lblChangeTxsCount.Content = string.Format("{0} [{1}]", database.TransactionDetails.OfType<ChangeTx>().Where(t => t.Validation == true).Count(), database.TransactionDetails.OfType<ChangeTx>().Count());
             lblBlocksCount.Content = database.Blocks.Count();
@@ -158,11 +158,33 @@ namespace CoinMillionsServer
             if (drawNextRndFlag)
                 doDrawNextRound();
 
+            // validate open drawBlocks
             validateDrawBlocks();
+
+            // process valid drawblocks
+            processValidDrawBlocks();
 
             // TODO: add block information updater
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        private void processValidDrawBlocks()
+        {
+            foreach (DrawBlock drawBlock in database.Blocks.OfType<DrawBlock>().Where(b => b.State == State.Valid))
+            {
+
+                // TODO handle payout and accounting!!!
+
+                drawBlock.State = State.Process;
+                database.SaveChanges();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         private void validateDrawBlocks()
         {
             foreach (DrawBlock drawBlock in database.Blocks.OfType<DrawBlock>().Where(b => b.State == State.Open))
@@ -226,7 +248,7 @@ namespace CoinMillionsServer
             };
 
             // assign tickets ... to the draw block
-            foreach (TicketTx ticketTx in database.TransactionDetails.OfType<TicketTx>().Where(t => t.DrawBlock == null && t.BlockIndex <= (drawBlock.Height - blockDrawSpacer)))
+            foreach (TicketTx ticketTx in getTransactionOfType(Type.Ticket).Where(t => t.DrawBlock == null && t.BlockIndex <= (drawBlock.Height - blockDrawSpacer)))
             {
                 drawBlock.TicketTxes.Add(ticketTx);
                 ticketTx.State = State.Assign;
@@ -256,7 +278,7 @@ namespace CoinMillionsServer
         private bool getValidDrawBlock(out Block block)
         {
             block = null;
-            TicketTx ticket = database.TransactionDetails.OfType<TicketTx>()
+            TicketTx ticket = getTransactionOfType(Type.Ticket)
                 .Where(t => t.DrawBlock == null)
                 .OrderByDescending(t => t.BlockIndex).FirstOrDefault();
 
@@ -279,7 +301,7 @@ namespace CoinMillionsServer
         /// <returns></returns>
         private bool isValidDrawRound()
         {
-            IQueryable<TicketTx> validTickets = database.TransactionDetails.OfType<TicketTx>().Where(t => t.State == State.Valid);
+            IQueryable<TicketTx> validTickets = getTransactionOfType(Type.Ticket).Where(t => t.State == State.Valid);
 
             // TODO: check if this validation is correct approach
             if (ticketDrawAmount > 0 && validTickets.Count() < ticketDrawAmount)
@@ -329,7 +351,7 @@ namespace CoinMillionsServer
 
                         RawTransaction rawtransaction = btc.GetRawTransactionObject(transaction.TxId);
                         string rawtransactionTxId = rawtransaction.Vin[0].TxId;
-                        TicketTx ticketTx = database.TransactionDetails.OfType<TicketTx>().Where(t => t.TxId == rawtransactionTxId).First();
+                        TicketTx ticketTx = getTransactionOfType(Type.Ticket).Where(t => t.TxId == rawtransactionTxId).First();
 
                         ticketTx.ChangeTx = changeTx;
                         database.SaveChanges();
@@ -374,10 +396,15 @@ namespace CoinMillionsServer
             // check if it's linked to a ticket transaction
             RawTransaction rawtransaction = btc.GetRawTransactionObject(transaction.TxId);
             string rawtransactionTxId = rawtransaction.Vin[0].TxId;
-            if (!database.TransactionDetails.OfType<TicketTx>().Any(t => t.TxId == rawtransactionTxId))
+            if (!getTransactionOfType(Type.Ticket).Any(t => t.TxId == rawtransactionTxId))
                 return false;
 
             return true;
+        }
+
+        private IQueryable<TicketTx> getTransactionOfType(Type type)
+        {
+            return database.TransactionDetails.OfType<TicketTx>().Where(t => t.Type == type);
         }
 
         /// <summary>
@@ -390,7 +417,7 @@ namespace CoinMillionsServer
             //foreach (TicketTx ticketTx in database.TransactionDetails.OfType<TicketTx>().Where(t => t.ChangeTx == null))
             //{
 
-            TicketTx ticketTx = database.TransactionDetails.OfType<TicketTx>().Where(t => t.ChangeTx == null).FirstOrDefault();
+            TicketTx ticketTx = getTransactionOfType(Type.Ticket).Where(t => t.ChangeTx == null).FirstOrDefault();
 
             if (ticketTx == null)
                 return;
@@ -435,7 +462,7 @@ namespace CoinMillionsServer
                 int payeeVoutN;
                 double payeeVoutValue;
 
-                TicketTx duplicate = database.TransactionDetails.OfType<TicketTx>().FirstOrDefault(t => t.TxId == transaction.TxId);
+                TicketTx duplicate = getTransactionOfType(Type.Ticket).FirstOrDefault(t => t.TxId == transaction.TxId);
 
                 if (isValidTicketTx(transaction) && duplicate == null && btc.DeepTransactionInfo(transaction.TxId, out changeVoutAdress, out payeeVoutAdress, out payeeVoutN, out payeeVoutValue))
                 {
@@ -459,7 +486,8 @@ namespace CoinMillionsServer
                         Time = transaction.Time,
                         TimeReceived = transaction.TimeReceived,
                         TxId = transaction.TxId,
-                        State = State.Open
+                        State = State.Open,
+                        Type = Type.Ticket
                     };
 
                     AddLine("{0}[{1}]: State changed to {2}", ticketTx.GetType(), smallHashTag(ticketTx.TxId), ticketTx.State);
@@ -566,7 +594,7 @@ namespace CoinMillionsServer
 
         private void Button_Click_Ticket(object sender, RoutedEventArgs e)
         {
-            foreach (TicketTx ticketTx in database.TransactionDetails.OfType<TicketTx>())
+            foreach (TicketTx ticketTx in getTransactionOfType(Type.Ticket))
             {
                 int[] personalTicket;
                 int[] randomTicket = lottery.getTicketFromHash(ticketTx.TxId);
@@ -583,7 +611,7 @@ namespace CoinMillionsServer
             AddLine("Drawed Ticket Block[{0}] --------------------- ", actualInfo.Blocks);
             AddLine("Draw.: {0}", lottery.getArrayToString(actualDraw));
 
-            foreach (TicketTx ticketTx in database.TransactionDetails.OfType<TicketTx>())
+            foreach (TicketTx ticketTx in getTransactionOfType(Type.Ticket))
             {
                 int pN, sN;
                 AddLine("TicketTx[{0}] -------------------------- ", ticketTx.ID);

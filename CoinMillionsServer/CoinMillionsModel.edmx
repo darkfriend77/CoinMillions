@@ -110,8 +110,10 @@
     <Key>
       <PropertyRef Name="ID" />
     </Key>
-    <Property Name="Sender" Type="nvarchar" Nullable="false" />
     <Property Name="State" Type="int" Nullable="false" />
+    <Property Name="Type" Type="int" Nullable="false" />
+    <Property Name="Sender" Type="nvarchar" Nullable="true" />
+    <Property Name="Receiver" Type="nvarchar" Nullable="true" />
     <Property Name="ID" Type="int" Nullable="false" />
     <Property Name="DrawBlock_ID" Type="int" Nullable="true" />
   </EntityType>
@@ -282,11 +284,13 @@
           </AssociationSet>
           </EntityContainer>
         <EntityType Name="TicketTx" BaseType="CoinMillionsModel.TransactionDetail">
-          <Property Type="String" Name="Sender" Nullable="false" />
           <NavigationProperty Name="ChangeTx" Relationship="CoinMillionsModel.TicketTxChangeTx" FromRole="TicketTx" ToRole="ChangeTx" />
           <NavigationProperty Name="Tickets" Relationship="CoinMillionsModel.TicketTxTicket" FromRole="TicketTx" ToRole="Ticket" />
           <NavigationProperty Name="DrawBlock" Relationship="CoinMillionsModel.DrawBlockTicketTx" FromRole="TicketTx" ToRole="DrawBlock" />
           <Property Type="CoinMillionsModel.State" Name="State" Nullable="false" />
+          <Property Type="CoinMillionsModel.Type" Name="Type" Nullable="false" />
+          <Property Type="String" Name="Sender" Nullable="true" />
+          <Property Type="String" Name="Receiver" Nullable="true" />
         </EntityType>
         <EntityType Name="ChangeTx" BaseType="CoinMillionsModel.TransactionDetail">
           <Property Type="Boolean" Name="Validation" Nullable="false" />
@@ -391,6 +395,11 @@
           <Member Name="Assign" />
           <Member Name="Invalid" />
         </EnumType>
+        <EnumType Name="Type">
+          <Member Name="Ticket" />
+          <Member Name="Change" />
+          <Member Name="Payout" />
+        </EnumType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -454,8 +463,10 @@
       <EntityTypeMapping TypeName="IsTypeOf(CoinMillionsModel.TicketTx)">
         <MappingFragment StoreEntitySet="TransactionDetails_TicketTx">
           <ScalarProperty Name="ID" ColumnName="ID" />
-          <ScalarProperty Name="Sender" ColumnName="Sender" />
           <ScalarProperty Name="State" ColumnName="State" />
+          <ScalarProperty Name="Type" ColumnName="Type" />
+          <ScalarProperty Name="Sender" ColumnName="Sender" />
+          <ScalarProperty Name="Receiver" ColumnName="Receiver" />
         </MappingFragment>
       </EntityTypeMapping>
       <EntityTypeMapping TypeName="IsTypeOf(CoinMillionsModel.ChangeTx)">

@@ -122,6 +122,9 @@
     <Compile Include="TransactionDetail.cs">
       <DependentUpon>CoinMillionsModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Type.cs">
+      <DependentUpon>CoinMillionsModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Wrapper\BaseBtcConnector.cs" />
     <Compile Include="Wrapper\BaseConnector.cs" />
     <Page Include="MainWindow.xaml">
