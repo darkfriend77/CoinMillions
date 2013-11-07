@@ -18,7 +18,7 @@ namespace CoinMillionsServer
         public string TicketString { get; set; }
         public State State { get; set; }
     
-        public virtual TicketTx TicketTx { get; set; }
+        public virtual Transaction TicketTx { get; set; }
         public virtual Finding Findings { get; set; }
         public virtual DrawBlock DrawBlock { get; set; }
     }

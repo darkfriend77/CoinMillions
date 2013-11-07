@@ -12,7 +12,7 @@ namespace CoinMillionsServer.Core
     class Lottery
     {
         const int NUMBERS = 5;
-        const int MAXNUMBERS = 22;
+        const int MAXNUMBERS = 21;
         const int STARS = 2;
         const int MAXSTARS = 9;
 
@@ -126,8 +126,6 @@ namespace CoinMillionsServer.Core
                                         ticketDictonary.Add(count++, new int[] { a, b, c, d, e, s, t });
         }
 
-
-
         /// <summary>
         /// 
         /// </summary>
@@ -145,7 +143,7 @@ namespace CoinMillionsServer.Core
         /// <returns></returns>
         internal bool getTicketFromAmount(double amount, out int[] ticket)
         {
-            ulong key = Convert.ToUInt64((amount - 0.01) * Math.Pow(10, 8));
+            ulong key = Convert.ToUInt64(Math.Pow(10, 6) - ((amount - 0.01) * Math.Pow(10, 8)));
             return ticketDictonary.TryGetValue(key, out ticket);
         }
 

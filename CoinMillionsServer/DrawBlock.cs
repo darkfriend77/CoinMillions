@@ -16,13 +16,13 @@ namespace CoinMillionsServer
     {
         public DrawBlock()
         {
-            this.TicketTxes = new HashSet<TicketTx>();
+            this.TicketTxes = new HashSet<Transaction>();
         }
     
         public double Pot { get; set; }
         public State State { get; set; }
     
         public virtual Ticket Tickets { get; set; }
-        public virtual ICollection<TicketTx> TicketTxes { get; set; }
+        public virtual ICollection<Transaction> TicketTxes { get; set; }
     }
 }

@@ -5,22 +5,20 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="42652995bd1c405d9d918a6b02be8643" Name="Diagramm1" >
-        <EntityTypeShape EntityType="CoinMillionsModel.TicketTx" Width="1.75" PointX="8" PointY="2.625" />
-        <EntityTypeShape EntityType="CoinMillionsModel.ChangeTx" Width="1.75" PointX="8" PointY="0.625" />
-        <EntityTypeShape EntityType="CoinMillionsModel.Finding" Width="1.75" PointX="10.625" PointY="3.875" />
+        <EntityTypeShape EntityType="CoinMillionsModel.Transaction" Width="1.75" PointX="6.5" PointY="2.5" />
+        <EntityTypeShape EntityType="CoinMillionsModel.Finding" Width="1.75" PointX="10.625" PointY="4.75" />
         <EntityTypeShape EntityType="CoinMillionsModel.Block" Width="1.75" PointX="0.5" PointY="0.75" />
         <EntityTypeShape EntityType="CoinMillionsModel.TransactionDetail" Width="1.75" PointX="3.125" PointY="0.625" />
-        <InheritanceConnector EntityType="CoinMillionsModel.ChangeTx" />
-        <InheritanceConnector EntityType="CoinMillionsModel.TicketTx" />
+        <InheritanceConnector EntityType="CoinMillionsModel.Transaction" />
         <AssociationConnector Association="CoinMillionsModel.TransactionDetailBlock" />
-        <AssociationConnector Association="CoinMillionsModel.TicketTxChangeTx" />
-        <EntityTypeShape EntityType="CoinMillionsModel.Ticket" Width="1.75" PointX="8.25" PointY="5.625" />
+        <EntityTypeShape EntityType="CoinMillionsModel.Ticket" Width="1.75" PointX="6.625" PointY="6.375" />
         <AssociationConnector Association="CoinMillionsModel.TicketTxTicket" />
         <AssociationConnector Association="CoinMillionsModel.TicketFinding" />
         <EntityTypeShape EntityType="CoinMillionsModel.DrawBlock" Width="1.75" PointX="0.5" PointY="5.375" />
         <InheritanceConnector EntityType="CoinMillionsModel.DrawBlock" />
         <AssociationConnector Association="CoinMillionsModel.DrawBlockTicket" />
         <AssociationConnector Association="CoinMillionsModel.DrawBlockTicketTx" />
+        <AssociationConnector Association="CoinMillionsModel.TicketTxTicketTx" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

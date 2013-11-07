@@ -15,7 +15,7 @@ namespace CoinMillionsServer.Data
         //createmultisig <nrequired> <'["key","key"]'>
         createrawtransaction, //[{"txid":txid,"vout":n},...] {address:amount,...}
         //importprivkey <bitcoinprivkey> [label] [rescan=true]
-        //listunspent [minconf=1] [maxconf=9999999] ["address",...]
+        listunspent, //[minconf=1] [maxconf=9999999] ["address",...]
         //lockunspent unlock? [array-of-Objects]
         //sendmany <fromaccount> {address:amount,...} [minconf=1] [comment]
         //setaccount <bitcoinaddress> <account>

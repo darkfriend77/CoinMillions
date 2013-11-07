@@ -91,9 +91,6 @@
     <Compile Include="Block.cs">
       <DependentUpon>CoinMillionsModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="ChangeTx.cs">
-      <DependentUpon>CoinMillionsModel.tt</DependentUpon>
-    </Compile>
     <Compile Include="Common\Constants.cs" />
     <Compile Include="Common\NodeAction.cs" />
     <Compile Include="Core\Lottery.cs" />
@@ -116,7 +113,7 @@
     <Compile Include="Ticket.cs">
       <DependentUpon>CoinMillionsModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="TicketTx.cs">
+    <Compile Include="Transaction.cs">
       <DependentUpon>CoinMillionsModel.tt</DependentUpon>
     </Compile>
     <Compile Include="TransactionDetail.cs">

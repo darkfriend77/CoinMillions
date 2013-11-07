@@ -12,9 +12,9 @@ namespace CoinMillionsServer
     using System;
     using System.Collections.Generic;
     
-    public partial class TicketTx : TransactionDetail
+    public partial class Transaction : TransactionDetail
     {
-        public TicketTx()
+        public Transaction()
         {
             this.Tickets = new HashSet<Ticket>();
         }
@@ -24,8 +24,9 @@ namespace CoinMillionsServer
         public string Sender { get; set; }
         public string Receiver { get; set; }
     
-        public virtual ChangeTx ChangeTx { get; set; }
         public virtual ICollection<Ticket> Tickets { get; set; }
         public virtual DrawBlock DrawBlock { get; set; }
+        public virtual Transaction ParentTx { get; set; }
+        public virtual Transaction ChildTx { get; set; }
     }
 }

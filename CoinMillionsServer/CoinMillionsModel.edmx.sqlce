@@ -2,7 +2,7 @@
 -- --------------------------------------------------
 -- Entity Designer DDL Script for SQL Server Compact Edition
 -- --------------------------------------------------
--- Date Created: 10/31/2013 17:22:44
+-- Date Created: 11/01/2013 11:50:16
 -- Generated from EDMX file: C:\Bitcoin\Projects\CoinMillions\CoinMillionsServer\CoinMillionsModel.edmx
 -- --------------------------------------------------
 
@@ -14,19 +14,17 @@
 
     ALTER TABLE [TransactionDetails] DROP CONSTRAINT [FK_TransactionDetailBlock];
 
-    ALTER TABLE [TransactionDetails_ChangeTx] DROP CONSTRAINT [FK_TicketTxChangeTx];
-
     ALTER TABLE [Tickets] DROP CONSTRAINT [FK_TicketTxTicket];
 
     ALTER TABLE [Tickets] DROP CONSTRAINT [FK_TicketFinding];
 
     ALTER TABLE [Blocks_DrawBlock] DROP CONSTRAINT [FK_DrawBlockTicket];
 
-    ALTER TABLE [TransactionDetails_TicketTx] DROP CONSTRAINT [FK_DrawBlockTicketTx];
+    ALTER TABLE [TransactionDetails_Transaction] DROP CONSTRAINT [FK_DrawBlockTicketTx];
 
-    ALTER TABLE [TransactionDetails_TicketTx] DROP CONSTRAINT [FK_TicketTx_inherits_TransactionDetail];
+    ALTER TABLE [TransactionDetails_Transaction] DROP CONSTRAINT [FK_TicketTxTicketTx];
 
-    ALTER TABLE [TransactionDetails_ChangeTx] DROP CONSTRAINT [FK_ChangeTx_inherits_TransactionDetail];
+    ALTER TABLE [TransactionDetails_Transaction] DROP CONSTRAINT [FK_Transaction_inherits_TransactionDetail];
 
     ALTER TABLE [Blocks_DrawBlock] DROP CONSTRAINT [FK_DrawBlock_inherits_Block];
 
@@ -44,9 +42,7 @@
 
     DROP TABLE [Tickets];
 
-    DROP TABLE [TransactionDetails_TicketTx];
-
-    DROP TABLE [TransactionDetails_ChangeTx];
+    DROP TABLE [TransactionDetails_Transaction];
 
     DROP TABLE [Blocks_DrawBlock];
 
@@ -111,23 +107,15 @@ CREATE TABLE [Tickets] (
 );
 
 
--- Creating table 'TransactionDetails_TicketTx'
-CREATE TABLE [TransactionDetails_TicketTx] (
+-- Creating table 'TransactionDetails_Transaction'
+CREATE TABLE [TransactionDetails_Transaction] (
     [State] int  NOT NULL,
     [Type] int  NOT NULL,
     [Sender] nvarchar(4000)  NULL,
     [Receiver] nvarchar(4000)  NULL,
     [ID] int  NOT NULL,
-    [DrawBlock_ID] int  NULL
-);
-
-
--- Creating table 'TransactionDetails_ChangeTx'
-CREATE TABLE [TransactionDetails_ChangeTx] (
-    [Validation] bit  NOT NULL,
-    [State] int  NOT NULL,
-    [ID] int  NOT NULL,
-    [TicketTx_ID] int  NOT NULL
+    [DrawBlock_ID] int  NULL,
+    [ChildTx_ID] int  NULL
 );
 
 
@@ -168,15 +156,9 @@ ADD CONSTRAINT [PK_Tickets]
     PRIMARY KEY ([ID] );
 
 
--- Creating primary key on [ID] in table 'TransactionDetails_TicketTx'
-ALTER TABLE [TransactionDetails_TicketTx]
-ADD CONSTRAINT [PK_TransactionDetails_TicketTx]
-    PRIMARY KEY ([ID] );
-
-
--- Creating primary key on [ID] in table 'TransactionDetails_ChangeTx'
-ALTER TABLE [TransactionDetails_ChangeTx]
-ADD CONSTRAINT [PK_TransactionDetails_ChangeTx]
+-- Creating primary key on [ID] in table 'TransactionDetails_Transaction'
+ALTER TABLE [TransactionDetails_Transaction]
+ADD CONSTRAINT [PK_TransactionDetails_Transaction]
     PRIMARY KEY ([ID] );
 
 
@@ -204,25 +186,11 @@ ON [TransactionDetails]
     ([Blocks_ID]);
 
 
--- Creating foreign key on [TicketTx_ID] in table 'TransactionDetails_ChangeTx'
-ALTER TABLE [TransactionDetails_ChangeTx]
-ADD CONSTRAINT [FK_TicketTxChangeTx]
-    FOREIGN KEY ([TicketTx_ID])
-    REFERENCES [TransactionDetails_TicketTx]
-        ([ID])
-    ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- Creating non-clustered index for FOREIGN KEY 'FK_TicketTxChangeTx'
-CREATE INDEX [IX_FK_TicketTxChangeTx]
-ON [TransactionDetails_ChangeTx]
-    ([TicketTx_ID]);
-
-
 -- Creating foreign key on [TicketTx_ID] in table 'Tickets'
 ALTER TABLE [Tickets]
 ADD CONSTRAINT [FK_TicketTxTicket]
     FOREIGN KEY ([TicketTx_ID])
-    REFERENCES [TransactionDetails_TicketTx]
+    REFERENCES [TransactionDetails_Transaction]
         ([ID])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
 
@@ -260,8 +228,8 @@ ON [Blocks_DrawBlock]
     ([Tickets_ID]);
 
 
--- Creating foreign key on [DrawBlock_ID] in table 'TransactionDetails_TicketTx'
-ALTER TABLE [TransactionDetails_TicketTx]
+-- Creating foreign key on [DrawBlock_ID] in table 'TransactionDetails_Transaction'
+ALTER TABLE [TransactionDetails_Transaction]
 ADD CONSTRAINT [FK_DrawBlockTicketTx]
     FOREIGN KEY ([DrawBlock_ID])
     REFERENCES [Blocks_DrawBlock]
@@ -270,22 +238,27 @@ ADD CONSTRAINT [FK_DrawBlockTicketTx]
 
 -- Creating non-clustered index for FOREIGN KEY 'FK_DrawBlockTicketTx'
 CREATE INDEX [IX_FK_DrawBlockTicketTx]
-ON [TransactionDetails_TicketTx]
+ON [TransactionDetails_Transaction]
     ([DrawBlock_ID]);
 
 
--- Creating foreign key on [ID] in table 'TransactionDetails_TicketTx'
-ALTER TABLE [TransactionDetails_TicketTx]
-ADD CONSTRAINT [FK_TicketTx_inherits_TransactionDetail]
-    FOREIGN KEY ([ID])
-    REFERENCES [TransactionDetails]
+-- Creating foreign key on [ChildTx_ID] in table 'TransactionDetails_Transaction'
+ALTER TABLE [TransactionDetails_Transaction]
+ADD CONSTRAINT [FK_TicketTxTicketTx]
+    FOREIGN KEY ([ChildTx_ID])
+    REFERENCES [TransactionDetails_Transaction]
         ([ID])
-    ON DELETE CASCADE ON UPDATE NO ACTION;
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_TicketTxTicketTx'
+CREATE INDEX [IX_FK_TicketTxTicketTx]
+ON [TransactionDetails_Transaction]
+    ([ChildTx_ID]);
 
 
--- Creating foreign key on [ID] in table 'TransactionDetails_ChangeTx'
-ALTER TABLE [TransactionDetails_ChangeTx]
-ADD CONSTRAINT [FK_ChangeTx_inherits_TransactionDetail]
+-- Creating foreign key on [ID] in table 'TransactionDetails_Transaction'
+ALTER TABLE [TransactionDetails_Transaction]
+ADD CONSTRAINT [FK_Transaction_inherits_TransactionDetail]
     FOREIGN KEY ([ID])
     REFERENCES [TransactionDetails]
         ([ID])

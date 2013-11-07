@@ -160,10 +160,10 @@ namespace CoinMillionsServer.Wrapper
         //    return BaseConnector.RequestServer(MethodName.getaccountaddress, account)["result"].ToString();
         //}
 
-        //public string GetAddressesByAccount(string account)
-        //{
-        //    return BaseConnector.RequestServer(MethodName.getaddressesbyaccount,account)["result"].ToString();
-        //}
+        public string GetAddressesByAccount(string account)
+        {
+            return BaseConnector.RequestServer(MethodName.getaddressesbyaccount,account)["result"][0].ToString();
+        }
 
         //public string GetBlockTemplate()
         //{
@@ -180,11 +180,10 @@ namespace CoinMillionsServer.Wrapper
         //    return BaseConnector.RequestServer(MethodName.getnewaddress, account)["result"].ToString();
         //}
 
-        //public string GetReceivedByAccount(string account)
-        //{
-        //    var rawTransaction = BaseConnector.RequestServer(MethodName.getreceivedbyaccount, account)["result"].ToString();
-        //    return rawTransaction;
-        //}
+        public string GetReceivedByAccount(string account)
+        {
+            return BaseConnector.RequestServer(MethodName.getreceivedbyaccount, account)["result"].ToString();
+        }
 
         //public string GetReceivedByAddress(string bitcoinAddress)
         //{
@@ -270,6 +269,11 @@ namespace CoinMillionsServer.Wrapper
         public string ListTransactionsString(string account = "", int count = 999999, int from = 0)
         {
             return BaseConnector.RequestServer(MethodName.listtransactions, new List<object>() {account, count, from})["result"].ToString();
+        }
+
+        public string ListUnspentString()
+        {
+            return BaseConnector.RequestServer(MethodName.listunspent)["result"].ToString();
         }
 
         //public string ListLockUnspent()
@@ -464,7 +468,7 @@ namespace CoinMillionsServer.Wrapper
         /// <param name="fee"></param>
         /// <param name="rawTransaction"></param>
         /// <returns></returns>
-        public bool CreateZeroConfirmationTransaction(string txid, double amountToKeep, double fee, out string rawTransaction)
+        public bool CreateZeroConfirmationTransaction(string txid, double amountToKeep, double fee, string adress, out string rawTransaction)
         {
             rawTransaction = string.Empty;
 
@@ -474,7 +478,10 @@ namespace CoinMillionsServer.Wrapper
             if (!DeepTransactionInfo(txid, out changeVoutAdress, out payeeVoutAdress, out payeeVoutN, out payeeVoutValue))
              return false;
 
-            rawTransaction = CreateRawTransaction(txid, payeeVoutN, changeVoutAdress, payeeVoutValue - amountToKeep, payeeVoutAdress, amountToKeep - fee);
+            if (adress != null && ValidateAddress(adress).IsValid)
+                payeeVoutAdress = adress;
+
+            rawTransaction = CreateRawTransaction(txid, payeeVoutN, changeVoutAdress, payeeVoutValue - (amountToKeep + fee), payeeVoutAdress, amountToKeep);
 
             return true;
         }

@@ -10,8 +10,8 @@
         <ProgressBar x:Name="progressBar1" Margin="0,157,0,160" Padding="0"/>
         <Label Content="TicketTxs:" HorizontalAlignment="Left" Margin="253,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.404,-0.993" Foreground="White"/>
         <Label x:Name="lblTicketTxsCount" Content="#" HorizontalAlignment="Left" Margin="323,10,0,0" VerticalAlignment="Top" Foreground="Lime" RenderTransformOrigin="1.5,0.5"/>
-        <Label x:Name="lblAmount" Content="#" HorizontalAlignment="Left" Margin="100,36,0,0" VerticalAlignment="Top" Foreground="Lime"/>
-        <Label Content="Amount:" HorizontalAlignment="Left" Margin="21,36,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label x:Name="lblBalance" Content="#" HorizontalAlignment="Left" Margin="529,88,0,0" VerticalAlignment="Top" Foreground="Lime"/>
+        <Label Content="Balance:" HorizontalAlignment="Left" Margin="456,88,0,0" VerticalAlignment="Top" Foreground="White"/>
         <Label Content="Status:" HorizontalAlignment="Left" Margin="253,114,0,0" VerticalAlignment="Top" Foreground="Yellow" FontWeight="Bold"/>
         <Label x:Name="lblStatus" Content="none" HorizontalAlignment="Left" Margin="303,114,0,0" VerticalAlignment="Top" Width="70" Foreground="Lime" FontWeight="Bold"/>
         <Label Content="Blocks:" HorizontalAlignment="Left" Margin="21,62,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.763,0.192" Foreground="White"/>
@@ -31,5 +31,9 @@
         <CheckBox x:Name="chBxDrawRnd" Content="Draw next rnd.?" HorizontalAlignment="Left" Margin="612,26,0,0" VerticalAlignment="Top" Foreground="White" Click="CheckBox_Clicked_DrawNextRound"/>
         <Label Content="Tickets:" HorizontalAlignment="Left" Margin="356,10,0,0" VerticalAlignment="Top" Foreground="White"/>
         <Label x:Name="lblTicketsCount" Content="#" HorizontalAlignment="Left" Margin="410,10,0,0" VerticalAlignment="Top" Foreground="Lime"/>
+        <Label Content="Receiver:" HorizontalAlignment="Left" Margin="454,36,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label Content="Pot:" HorizontalAlignment="Left" Margin="454,62,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.053,0.308" Foreground="White"/>
+        <Label x:Name="lblPot" Content="#" HorizontalAlignment="Left" Margin="529,62,0,0" VerticalAlignment="Top" Foreground="Lime"/>
+        <Label x:Name="lblReceiver" Content="#" HorizontalAlignment="Left" Margin="529,36,0,0" VerticalAlignment="Top" Foreground="Lime"/>
     </Grid>
 </Window>

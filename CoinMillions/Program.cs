@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CoinMillionsServer;
 using CoinMillionsServer.Wrapper;
 using MathNet.Numerics;
 using MathNet.Numerics.Distributions;
@@ -26,9 +27,15 @@ namespace CoinMillions
             //Console.WriteLine("GetInfo: {0}", btc.GetInfo());
             //Console.WriteLine("ListReceivedByAddress: {0}", btc.ListReceivedByAddress());
 
-            //Transaction transaction = btc.ListTransactions().Last();
+            foreach(TransactionDetail transactionsDetail in btc.ListTransactions())
+            {
+                Console.WriteLine("--------- {0}", transactionsDetail.TxId);
+                Console.WriteLine("transactionsDetail.Address: {0}", transactionsDetail.Address);
+                Console.WriteLine("transactionsDetail.Category: {0}", transactionsDetail.Category);
+                Console.WriteLine("transactionsDetail.Amount: {0}", transactionsDetail.Amount);
+            };
 
-            //BitcoinWrapper.Data.Transaction transaction = btc.DecodeRawTransaction(btc.GetRawTransaction(inWalletTransaction.TxId));
+            Console.WriteLine(btc.ListUnspentString());
 
             //Console.WriteLine("Transaction: {0}", transaction);
             //Console.WriteLine("Transaction: {0}", transaction.TxId);
