@@ -430,37 +430,32 @@ namespace CoinMillionsServer
         {
             lblStatus.Content = string.Format("makeChangeTxs");
 
-            //foreach (Transaction ticketTx in database.TransactionDetails.OfType<Transaction>().Where(t => t.ChangeTx == null))
-            //{
-
-            Transaction ticketTx = getTransactionOfType(Type.Ticket).Where(t => t.ChildTx == null && t.TxId != "15efddebe6bd3e9c47950c9c84d21029c1b056b375c0ca54585d296a05f3ac90").FirstOrDefault();
-
-            if (ticketTx == null)
-                return;
-
-            double networkFeeTx = networkFee;
-            double amountToKeepTx = ticketCost;
-            //if (ticketTx.Amount == ticketCost)
-            //{
-            //    AddLine("We've a single ticket transaction ....");
-            //    networkFeeTx = networkFee / 2;
-            //    amountToKeepTx = ticketCost - networkFeeTx;
-            //}
-
-            string rawTransaction;
-            if (btc.CreateZeroConfirmationTransaction(ticketTx.TxId, amountToKeepTx, networkFeeTx, btc.GetAddressesByAccount("Pot"), out rawTransaction))
+            foreach (Transaction ticketTx in getTransactionOfType(Type.Ticket).Where(t => t.ChildTx == null))
             {
-                AddLine("rawTransaction[{0}]: {1}", smallHashTag(ticketTx.TxId), true);
-                SignedRawTransaction signrawtransaction = btc.SignRawTransaction(rawTransaction);
-                AddLine("signedRawTransaction[{0}]: {1}", smallHashTag(ticketTx.TxId), signrawtransaction.Complete);
 
-                if (!signrawtransaction.Complete)
-                    AddLine("signedRawTransaction[{0}]: {1}", smallHashTag(ticketTx.TxId), "not completed!");
+                //Transaction ticketTx = getTransactionOfType(Type.Ticket).Where(t => t.ChildTx == null).FirstOrDefault();
 
-                // TODO ... need to check if it was successful !!!
-                string changeTxId = btc.SendRawTransaction(signrawtransaction.Hex);
+                if (ticketTx == null)
+                    return;
 
-                AddLine("changeTxId[{0}]: {1}", smallHashTag(ticketTx.TxId), smallHashTag(changeTxId));
+                double networkFeeTx = networkFee;
+                double amountToKeepTx = ticketCost;
+
+                string rawTransaction;
+                if (btc.CreateZeroConfirmationTransaction(ticketTx.TxId, amountToKeepTx, networkFeeTx, btc.GetAddressesByAccount("Pot"), out rawTransaction))
+                {
+                    AddLine("rawTransaction[{0}]: {1}", smallHashTag(ticketTx.TxId), true);
+                    SignedRawTransaction signrawtransaction = btc.SignRawTransaction(rawTransaction);
+                    AddLine("signedRawTransaction[{0}]: {1}", smallHashTag(ticketTx.TxId), signrawtransaction.Complete);
+
+                    if (!signrawtransaction.Complete)
+                        AddLine("signedRawTransaction[{0}]: {1}", smallHashTag(ticketTx.TxId), "not completed!");
+
+                    // TODO ... need to check if it was successful !!!
+                    string changeTxId = btc.SendRawTransaction(signrawtransaction.Hex);
+
+                    AddLine("changeTxId[{0}]: {1}", smallHashTag(ticketTx.TxId), smallHashTag(changeTxId));
+                }
             }
         }
 

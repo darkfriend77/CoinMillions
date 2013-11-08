@@ -211,10 +211,10 @@ namespace CoinMillionsServer.Wrapper
             return BaseConnector.RequestServer(MethodName.gettransaction, txid)["result"].ToObject<Transaction>();
         }
 
-        //public string GetTransactionString(string txid)
-        //{
-        //    return BaseConnector.RequestServer(MethodName.gettransaction, txid)["result"].ToString();
-        //}
+        public string GetTransactionString(string txid)
+        {
+            return BaseConnector.RequestServer(MethodName.gettransaction, txid)["result"].ToString();
+        }
 
         //public string GetWork()
         //{
