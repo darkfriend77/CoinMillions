@@ -94,7 +94,7 @@ namespace CoinMillions.BitcoinClient
             JObject jObjectAdress = new JObject();
             foreach (RawTarget target in targets)
             {
-                jObjectAdress.Add(target.Address, target.Amount);    
+                jObjectAdress.Add(target.Address, target.Amount.ToBitcoinValue());    
             }
 
             return QueryServer(MethodName.CreateRawTransaction, jArray, jObjectAdress)["result"].ToString();
