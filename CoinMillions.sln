@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinMillions", "CoinMillions\CoinMillions.csproj", "{8126DBD5-EA4C-43C7-9E7B-E16ED20665D4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinMillionsServer", "CoinMillionsServer\CoinMillionsServer.csproj", "{B805BC50-B3EE-42AF-9E1C-D235A7AB46EE}"
@@ -11,6 +13,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{BAE50C
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinMillions.BitcoinClient.Tests", "CoinMillions.BitcoinClient.Tests\CoinMillions.BitcoinClient.Tests.csproj", "{325047A9-4B94-4BCB-9DB3-605407949682}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinMillions.BitcoinClient", "CoinMillions.BitcoinClient\CoinMillions.BitcoinClient.csproj", "{A4770F75-3B94-44F0-8F75-3E9D59D2F881}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +32,14 @@ Global
 		{B805BC50-B3EE-42AF-9E1C-D235A7AB46EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B805BC50-B3EE-42AF-9E1C-D235A7AB46EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B805BC50-B3EE-42AF-9E1C-D235A7AB46EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{325047A9-4B94-4BCB-9DB3-605407949682}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{325047A9-4B94-4BCB-9DB3-605407949682}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{325047A9-4B94-4BCB-9DB3-605407949682}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{325047A9-4B94-4BCB-9DB3-605407949682}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4770F75-3B94-44F0-8F75-3E9D59D2F881}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4770F75-3B94-44F0-8F75-3E9D59D2F881}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4770F75-3B94-44F0-8F75-3E9D59D2F881}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4770F75-3B94-44F0-8F75-3E9D59D2F881}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
