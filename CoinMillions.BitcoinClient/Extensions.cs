@@ -19,9 +19,9 @@ namespace CoinMillions.BitcoinClient
         /// <remarks> superreeen, 09.11.2013. </remarks>
         /// <param name="value"> The value to act on. </param>
         /// <returns> value as a string. </returns>
-        public static string ToBitcoinValue(this decimal value)
+        public static decimal ToBitcoinValue(this decimal value)
         {
-            return Math.Round(value - 0.000000005M, 8, MidpointRounding.AwayFromZero).ToString("0.00000000", CultureInfo.InvariantCulture);
+            return decimal.Parse(Math.Round(value - 0.000000005M, 8, MidpointRounding.AwayFromZero).ToString("0.00000000", CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
         }
     }
 }

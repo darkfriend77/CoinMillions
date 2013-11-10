@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CoinMillions.BitcoinClient.Tests")]
+[assembly: AssemblyTitle("CoinMillions.Service.Console")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("CoinMillions.BitcoinClient.Tests")]
+[assembly: AssemblyProduct("CoinMillions.Service.Console")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("b5636606-4133-44e8-bbc8-b6d144e018a9")]
+[assembly: Guid("dec84e08-f063-4b88-81df-2961ae9ba121")]
 
 // Version information for an assembly consists of the following four values:
 //

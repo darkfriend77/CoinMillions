@@ -16,7 +16,7 @@ namespace CoinMillions.BitcoinClient.Data
     {
         /// <summary> Gets or sets the value. </summary>
         /// <value> The value. </value>
-        public double Value { get; set; }
+        public decimal Value { get; set; }
 
         /// <summary> Gets or sets the n. </summary>
         /// <value> The n. </value>

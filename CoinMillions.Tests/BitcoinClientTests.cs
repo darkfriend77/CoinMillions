@@ -1,8 +1,9 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-namespace CoinMillions.BitcoinClient.Tests
+﻿namespace CoinMillions.Tests
 {
+    using System;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using CoinMillions.BitcoinClient;
+
     [TestClass]
     public class BitcoinClientTests
     {

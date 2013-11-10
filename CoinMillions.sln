@@ -14,9 +14,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{BAE50C
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinMillions.BitcoinClient.Tests", "CoinMillions.BitcoinClient.Tests\CoinMillions.BitcoinClient.Tests.csproj", "{325047A9-4B94-4BCB-9DB3-605407949682}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinMillions.BitcoinClient", "CoinMillions.BitcoinClient\CoinMillions.BitcoinClient.csproj", "{A4770F75-3B94-44F0-8F75-3E9D59D2F881}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinMillions.Service.Base", "CoinMillions.Service.Base\CoinMillions.Service.Base.csproj", "{028A0A8B-F250-4BEC-8D25-75B29EC0B6F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinMillions.Tests", "CoinMillions.Tests\CoinMillions.Tests.csproj", "{CEBE6811-9C7D-440D-962D-9CE404D2DC26}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinMillions.Service.Console", "CoinMillions.Service.Console\CoinMillions.Service.Console.csproj", "{8FC5D5F7-184C-4253-A750-8DF53DDFF5DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,14 +36,22 @@ Global
 		{B805BC50-B3EE-42AF-9E1C-D235A7AB46EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B805BC50-B3EE-42AF-9E1C-D235A7AB46EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B805BC50-B3EE-42AF-9E1C-D235A7AB46EE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{325047A9-4B94-4BCB-9DB3-605407949682}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{325047A9-4B94-4BCB-9DB3-605407949682}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{325047A9-4B94-4BCB-9DB3-605407949682}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{325047A9-4B94-4BCB-9DB3-605407949682}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A4770F75-3B94-44F0-8F75-3E9D59D2F881}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A4770F75-3B94-44F0-8F75-3E9D59D2F881}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4770F75-3B94-44F0-8F75-3E9D59D2F881}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4770F75-3B94-44F0-8F75-3E9D59D2F881}.Release|Any CPU.Build.0 = Release|Any CPU
+		{028A0A8B-F250-4BEC-8D25-75B29EC0B6F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{028A0A8B-F250-4BEC-8D25-75B29EC0B6F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{028A0A8B-F250-4BEC-8D25-75B29EC0B6F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{028A0A8B-F250-4BEC-8D25-75B29EC0B6F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEBE6811-9C7D-440D-962D-9CE404D2DC26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEBE6811-9C7D-440D-962D-9CE404D2DC26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEBE6811-9C7D-440D-962D-9CE404D2DC26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEBE6811-9C7D-440D-962D-9CE404D2DC26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FC5D5F7-184C-4253-A750-8DF53DDFF5DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FC5D5F7-184C-4253-A750-8DF53DDFF5DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FC5D5F7-184C-4253-A750-8DF53DDFF5DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FC5D5F7-184C-4253-A750-8DF53DDFF5DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

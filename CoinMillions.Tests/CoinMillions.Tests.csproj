@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{325047A9-4B94-4BCB-9DB3-605407949682}</ProjectGuid>
+    <ProjectGuid>{CEBE6811-9C7D-440D-962D-9CE404D2DC26}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CoinMillions.BitcoinClient.Tests</RootNamespace>
-    <AssemblyName>CoinMillions.BitcoinClient.Tests</AssemblyName>
+    <RootNamespace>CoinMillions.Tests</RootNamespace>
+    <AssemblyName>CoinMillions.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -52,11 +52,16 @@
   <ItemGroup>
     <Compile Include="BitcoinClientTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceBaseTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CoinMillions.BitcoinClient\CoinMillions.BitcoinClient.csproj">
       <Project>{a4770f75-3b94-44f0-8f75-3e9d59d2f881}</Project>
       <Name>CoinMillions.BitcoinClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CoinMillions.Service.Base\CoinMillions.Service.Base.csproj">
+      <Project>{028a0a8b-f250-4bec-8d25-75b29ec0b6f0}</Project>
+      <Name>CoinMillions.Service.Base</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
