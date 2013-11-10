@@ -42,6 +42,8 @@ namespace CoinMillions.Service.Base
         private const decimal NetworkFee = 0.0001M;
         /// <summary> The dust amount. </summary>
         private const decimal DustAmount = 0.00005430M;
+        /// <summary> The block spaceing. </summary>
+        private const int BlockSpaceing = 10;
 
         /// <summary> The log. </summary>
         private ILog m_Log = LogManager.GetLogger(typeof(ServiceBase));
@@ -70,7 +72,7 @@ namespace CoinMillions.Service.Base
             var blockCount = m_Client.GetBlockCount();
             ProcessBets();
 
-            if (blockCount % 144 == 0)
+            if (blockCount % BlockSpaceing == 0)
                 ProcessDraw();
         }
 
@@ -169,16 +171,22 @@ namespace CoinMillions.Service.Base
 
             m_Log.Info("Starting Processing of Bets.");
             List<UnspentInput> inputs = m_Client.ListUnspent().Where(u => u.Address.Equals(BetAddress)).ToList();
-            m_Log.InfoFormat("Got {0} unspent inputs.", inputs.Count);
-            Dictionary<string, decimal> outputs = GetBetValidationOutput(inputs);
-
-            List<RawTarget> targets = GetTargets(outputs);
-
-            if (targets.Count > 0)
+            while (inputs.Count > 0)
             {
-                var rawTrans = m_Client.CreateRawTransaction(inputs, targets);
-                var signedRawTrans = m_Client.SignRawTransaction(rawTrans);
-                var sentRawTrans = m_Client.SendRawTransaction(signedRawTrans.Hex);
+                m_Log.InfoFormat("Got {0} unspent inputs.", inputs.Count);
+                inputs = inputs.Take(50).ToList();
+                Dictionary<string, decimal> outputs = GetBetValidationOutput(inputs);
+
+                List<RawTarget> targets = GetTargets(outputs);
+
+                if (targets.Count > 0)
+                {
+                    var rawTrans = m_Client.CreateRawTransaction(inputs, targets);
+                    var signedRawTrans = m_Client.SignRawTransaction(rawTrans);
+                    var sentRawTrans = m_Client.SendRawTransaction(signedRawTrans.Hex);
+                    m_Log.InfoFormat("Send transaction with TxId {0}.", sentRawTrans);
+                }
+                inputs = m_Client.ListUnspent().Where(u => u.Address.Equals(BetAddress)).ToList();
             }
             m_Log.Info("Finished Processing of Bets.");
         }
@@ -255,6 +263,7 @@ namespace CoinMillions.Service.Base
                 var rawTrans = m_Client.CreateRawTransaction(realinputs, targets);
                 var signedRawTrans = m_Client.SignRawTransaction(rawTrans);
                 var sentRawTrans = m_Client.SendRawTransaction(signedRawTrans.Hex);
+                m_Log.InfoFormat("Send transaction with TxId {0}.", sentRawTrans);
             }
             m_Log.Info("Finished Processing of a Draw.");
         }
