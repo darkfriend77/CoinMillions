@@ -42,7 +42,7 @@ using log4net;
         private static Dictionary<ulong, int[]> GetTicketPool()
         {
             Dictionary<ulong, int[]> ticketPool = new Dictionary<ulong, int[]>();
-            ulong count = 1;
+            ulong count = 0;
 
             // numbers
             for (int a = 1; a < MaxNumbers - Numbers + 2; a++)
