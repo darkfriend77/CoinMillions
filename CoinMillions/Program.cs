@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CoinMillionsServer;
+using CoinMillionsServer.Core;
 using CoinMillionsServer.Wrapper;
 using MathNet.Numerics;
 using MathNet.Numerics.Distributions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace CoinMillions
+namespace CoinMillionsServer
 {
     class Program
     {
@@ -18,14 +18,16 @@ namespace CoinMillions
         {
 
 
-            //using (var db = new DatabaseEntities())
-            //{
-            //}
-
             BitcoinQtConnector btc = new BitcoinQtConnector();
+            Lottery lottery = new Lottery();
+
+            // Statistical Distribution
+            //StatisticalDistribution1(btc, lottery);
+            //StatisticalDistribution2(btc, lottery);
 
 
-            Console.WriteLine(btc.GetTransactionString("04ab47bf1759321089718f96d4f7fd5cf26ba546c9cc45cf201af30ffb59dde6"));
+            
+
 
 
             //Console.WriteLine("GetInfo: {0}", btc.GetInfo());
@@ -154,17 +156,17 @@ namespace CoinMillions
             //Console.WriteLine("rawTransaction: {0}", rawTransaction["result"].ToString());
 
 
-//Yeah it works
-//But its safer to go back an extra transaction
-//Take the vout that was sent to you
-//Get the raw transaction associated with it
-//And find the vout in it that was used as input to the transaction you received
-//And use the address in there
+            //Yeah it works
+            //But its safer to go back an extra transaction
+            //Take the vout that was sent to you
+            //Get the raw transaction associated with it
+            //And find the vout in it that was used as input to the transaction you received
+            //And use the address in there
 
-//What stops anybody from creating a transaction with no change ?
-//I could perfectly create a transaction with two vouts that are not change and no change at all
-//Then with your technique you wouldnt be sending me back the funds ?
-//(no question mark typo sry)
+            //What stops anybody from creating a transaction with no change ?
+            //I could perfectly create a transaction with two vouts that are not change and no change at all
+            //Then with your technique you wouldnt be sending me back the funds ?
+            //(no question mark typo sry)
 
             //'[{"txid":"7649b33b6d80f7b5c866fbdb413419e04223974b0a5d6a3ca54944f30474d2bf","vout":0}]' '{"mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5":50}'
             //Console.WriteLine("CreateRawTransaction: {0}", btc.CreateRawTransaction("7649b33b6d80f7b5c866fbdb413419e04223974b0a5d6a3ca54944f30474d2bf", 0, "mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5", (long)50.0));
@@ -204,25 +206,85 @@ namespace CoinMillions
             //                        }
 
 
-            JArray jArray = new JArray();
-            jArray.Add(1);
-            jArray.Add(2);
-            jArray.Add(3);
-            jArray.Add(4);
-            jArray.Add(5);
+            //JArray jArray = new JArray();
+            //jArray.Add(1);
+            //jArray.Add(2);
+            //jArray.Add(3);
+            //jArray.Add(4);
+            //jArray.Add(5);
 
-            Console.WriteLine(jArray.ToString());
+            //Console.WriteLine(jArray.ToString());
 
 
 
-            JArray jObject = (JArray)JsonConvert.DeserializeObject(jArray.ToString());
+            //JArray jObject = (JArray)JsonConvert.DeserializeObject(jArray.ToString());
 
-            int[] result = jObject.ToObject<int[]>();
+            //int[] result = jObject.ToObject<int[]>();
 
-            Console.WriteLine("{0} {1} {2} {3} {4}", result[0], result[1], result[2], result[3], result[4]);
+            //Console.WriteLine("{0} {1} {2} {3} {4}", result[0], result[1], result[2], result[3], result[4]);
 
             Console.ReadKey();
         }
 
+        private static void StatisticalDistribution1(BitcoinQtConnector btc, Lottery lottery)
+        {
+            int amoutBlocks = btc.GetInfo().Blocks;
+            Block block = btc.GetBlock(btc.GetBlockhash(1));
+            int[] draw = lottery.getTicketFromHash(block.MerkleRoot);
+
+            Dictionary<string, int> dict = new Dictionary<string, int>();
+            int totalCount = 0;
+            for (int i = 2; i < amoutBlocks; i++)
+            {
+                Console.WriteLine(string.Format("{0,7:0.00 %}", (double)i / amoutBlocks));
+                foreach (JToken jToken in btc.GetBlockObject(btc.GetBlockhash(i))["tx"].ToObject<JArray>())
+                {
+                    totalCount++;
+                    //Console.Write(jToken.ToString() + " -> ");
+                    int[] ticketDraw = lottery.getTicketFromHash(jToken.ToString());
+                    int[] finding = lottery.compareTicket(draw, ticketDraw);
+                    string key = lottery.getArrayToString(finding);
+
+                    if (dict.ContainsKey(key))
+                        dict[key]++;
+                    else
+                        dict[key] = 1;
+                    //Console.WriteLine("{0}", lottery.getArrayToString(finding));
+                }
+            }
+
+            foreach (string key in dict.Keys.ToList())
+            {
+                Console.WriteLine("{0} {1} -> {2} - {3}", key, "", dict[key], string.Format("{0,7:0.000000 %}", (double)dict[key] / totalCount));
+            }
+        }
+        private static void StatisticalDistribution2(BitcoinQtConnector btc, Lottery lottery)
+        {
+            int amoutBlocks = btc.GetInfo().Blocks;
+            int[] distNumbers = new int[Lottery.MAXNUMBERS + 1];
+            int[] distStars = new int[Lottery.MAXSTARS + 1];
+            for (int i = 1; i < amoutBlocks; i++)
+            {
+                Block block = btc.GetBlock(btc.GetBlockhash(i));
+                int[] draw = lottery.getTicketFromHash(block.MerkleRoot);
+                Console.WriteLine(string.Format("{0,7:0.00 %}", (double)i / amoutBlocks));
+                for (int y = 0; y < Lottery.NUMBERS; y++)
+                {
+                    distNumbers[0]++;
+                    distNumbers[draw[y]]++;
+                }
+                for (int x = 0; x < Lottery.STARS; x++)
+                {
+                    distStars[0]++;
+                    distStars[draw[Lottery.NUMBERS + x]]++;
+                }
+            }
+            Console.WriteLine(lottery.getArrayToString(distNumbers));
+            Console.WriteLine(lottery.getArrayToString(distStars));
+            for (int i = 1; i < distNumbers.Length; i++)
+                Console.WriteLine("Number {0}: {1}", string.Format("{0,3:0}", i), string.Format("{0,7:0.00 %}", (double)distNumbers[i] / distNumbers[0]));
+            for (int i = 1; i < distStars.Length; i++)
+                Console.WriteLine("Star {0}: {1}", string.Format("{0,3:0}", i), string.Format("{0,7:0.00 %}", (double)distStars[i] / distStars[0]));
+        }
     }
 }
