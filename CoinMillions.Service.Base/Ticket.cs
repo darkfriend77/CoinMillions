@@ -72,24 +72,35 @@ using log4net;
             return m_TicketPool[key];
         }
 
-        /// <summary> Gets split hash lenght. </summary>
-        /// <remarks> superreeen, 09.11.2013. </remarks>
+        /// <summary>  </summary>
+        /// 
         /// <param name="hash"> The hash to split. </param>
         /// <returns> The split hash lenght. </returns>
-        private static int GetSplitHashLenght(string hash)
+
+        /// <summary>
+        /// Evaluates the starting hex number to help obfuscate the number algorthm.
+        /// </summary>
+        /// <remarks> darkfriend, 01.11.2013. </remarks>
+        /// <param name="hash"> The hash to evaluate from. </param>
+        /// <param name="start"> Starting from. </param>
+        /// <param name="length"> Length of the evaluated part. </param>
+        /// <param name="mod"> Modulo of the returned value. </param>
+        /// <returns></returns>
+        private static int GetSplitHashLenght(string hash, int start = 0, int length = 4, int mod = 5)
         {
-            return int.Parse(hash.Substring(0, 4), System.Globalization.NumberStyles.HexNumber) % 5;
+            return int.Parse(hash.Substring(start, length), System.Globalization.NumberStyles.HexNumber) % mod;
         }
 
-        /// <summary> Ticket from hash. </summary>
-        /// <remarks> superreeen, 09.11.2013. </remarks>
+        /// <summary> Geerates a Ticket out of a hash. </summary>
+        /// <remarks> darkfriend, 01.11.2013. </remarks>
         /// <param name="hash"> The hash source hash. </param>
-        /// <returns> An int[]. </returns>
+        /// <returns> A ticket. </returns>
         internal static int[] TicketFromHash(string hash)
         {
             ulong nummer = 0;
             string splitHash = "";
 
+            // obfuscate number algorithm (standard is 0,4,5)
             int splitHashLenght = GetSplitHashLenght(hash);
 
             foreach (char t in hash)
