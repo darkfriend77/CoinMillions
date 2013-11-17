@@ -424,15 +424,15 @@ using System.Threading;
         /// <returns> A JObject. </returns>
         private static JObject BuildRequestJObject(MethodName methodName, params object[] args)
         {
-            JObject joe = new JObject();
-            joe.Add(new JProperty("jsonrpc", "1.0"));
-            joe.Add(new JProperty("id", "1"));
-            joe.Add(new JProperty("method", methodName.ToString().ToLower()));
+            JObject jObject = new JObject();
+            jObject.Add(new JProperty("jsonrpc", "1.0"));
+            jObject.Add(new JProperty("id", "1"));
+            jObject.Add(new JProperty("method", methodName.ToString().ToLower()));
 
             // adds provided paramters
-            joe.Add(new JProperty("params", args));
+            jObject.Add(new JProperty("params", args));
 
-            return joe;
+            return jObject;
         }
         #endregion
 

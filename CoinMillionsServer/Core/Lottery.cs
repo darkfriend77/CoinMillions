@@ -9,12 +9,12 @@ using Newtonsoft.Json.Linq;
 
 namespace CoinMillionsServer.Core
 {
-    class Lottery
+    public class Lottery
     {
-        const int NUMBERS = 5;
-        const int MAXNUMBERS = 21;
-        const int STARS = 2;
-        const int MAXSTARS = 9;
+        public const int NUMBERS = 5;
+        public const int MAXNUMBERS = 21;
+        public const int STARS = 2;
+        public const int MAXSTARS = 9;
 
         private Dictionary<ulong, int[]> ticketDictonary = new Dictionary<ulong, int[]>();
 
@@ -111,7 +111,7 @@ namespace CoinMillionsServer.Core
         /// </summary>
         private void generateNumbers()
         {
-            ulong count = 1;
+            ulong count = 0;
             
             // numbers
             for (int a = 1; a < MAXNUMBERS - NUMBERS + 2; a++)

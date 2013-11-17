@@ -28,13 +28,13 @@ namespace CoinMillions.Service.Base
         private const string JackpotAccount = "Jackpot";
 
         /// <summary> The bet address. </summary>
-        private const string BetAddress = "mz7dc4UqEmmekLuDQcb6PCngFLHKhYAsQ4";
+        private const string BetAddress = "mxtZKbWUwK8DrqymEVhfT89GyY4eL2fV7F";
         /// <summary> The pot address. </summary>
-        private const string PotAddress = "mo6xVdPofLjr516WdQp3UQp94fpFp6sLLf";
+        private const string PotAddress = "mxqiQDpqDg1Q99uSGtpqU9o6ccVygPQ5VH";
         /// <summary> The own address. </summary>
-        private const string OwnAddress = "n2RGZCWuX8VytneKLwQYxAoQt2nwM8e2rt";
+        private const string OwnAddress = "mvJMWVcdFXaXmpQLn8ipxWzjAZEfzcPU9U";
         /// <summary> The jackpot address. </summary>
-        private const string JackpotAddress = "mnLjgQTZEnJ9STCCGFd2u3G96dahrHS6SC";
+        private const string JackpotAddress = "mmeHTcKxw6FSkURcB3zfZHrQtZB1ymzebC";
 
         /// <summary> The house fee. </summary>
         private const decimal HouseFee = 0.05M;
@@ -44,6 +44,13 @@ namespace CoinMillions.Service.Base
         private const decimal DustAmount = 0.00005430M;
         /// <summary> The block spaceing. </summary>
         private const int BlockSpaceing = 50;
+
+        ///// <summary> Block spacing draw event 0 -> Off </summary>
+        //private const int BlockSpaceingToDraw = 10;
+        ///// <summary> Pot amount draw event 0 -> Off </summary>
+        //private const int PotAmountToDraw = 0;
+        ///// <summary> Time past to draw event 0 -> Off </summary>
+        //private const int TimePastToDraw = 0;
 
         /// <summary> The log. </summary>
         private ILog m_Log = LogManager.GetLogger(typeof(ServiceBase));
@@ -63,24 +70,44 @@ namespace CoinMillions.Service.Base
             m_Client.NewBlockFound += NewBlockFound;
         }
 
+        /// <summary> Prevents a default instance of the ServiceBase class from being created. </summary>
+        /// <remarks> superreeen, 09.11.2013. </remarks>
+        private ServiceBase()
+        {
+        }
+
         /// <summary> Creates a new block found. </summary>
         /// <remarks> superreeen, 10.11.2013. </remarks>
         /// <param name="sender"> Source of the event. </param>
         /// <param name="e"> Event information. </param>
         private void NewBlockFound(object sender, EventArgs e)
         {
-            var blockCount = m_Client.GetBlockCount();
+            // process bets from the foun block
             ProcessBets();
-            //if(blockCount % BlockSpaceing == 0)
             ProcessDraw();
+
+            // check if a draw event is triggered
+            //if (TriggerDraw())
+            //    ProcessDraw();
         }
 
-        /// <summary> Prevents a default instance of the ServiceBase class from being created. </summary>
-        /// <remarks> superreeen, 09.11.2013. </remarks>
-        private ServiceBase()
-        {
+        /// <summary> Check if a draw event is triggered </summary>
+        /// <remarks> darkfriend, 14.11.2013. </remarks>
+        /// <returns> Returns true if a draw event has to be processed. </returns>
+        //private bool TriggerDraw()
+        //{
+        //    var blockCount = m_Client.GetBlockCount();
+        //    if (BlockSpaceingToDraw > 0 && blockCount % BlockSpaceingToDraw == 0)
+        //        return true;
 
-        }
+        //    if (PotAmountToDraw > 0)
+        //        throw new NotImplementedException("Draw event pot amount not implemented.");
+
+        //    if (TimePastToDraw > 0)
+        //        throw new NotImplementedException("Draw event time past not implemented.");
+
+        //    return false;
+        //}
 
         /// <summary> Applies the fee. </summary>
         /// <remarks> superreeen, 10.11.2013. </remarks>
@@ -225,7 +252,7 @@ namespace CoinMillions.Service.Base
             {
                 ulong currentBlockHeight = m_Client.GetBlockCount();
                 ulong blockHeight = (currentBlockHeight / BlockSpaceing) * BlockSpaceing;
-                
+
                 List<UnspentInput> rawInputs = m_Client.ListUnspent().ToList().Where(i => currentBlockHeight - i.Confirmations < blockHeight).ToList();
                 List<UnspentInput> inputs = rawInputs.Where(u => u.Address.Equals(PotAddress)).ToList();
                 List<UnspentInput> jinputs = rawInputs.Where(u => u.Address.Equals(JackpotAddress)).ToList();

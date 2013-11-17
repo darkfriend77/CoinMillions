@@ -41,6 +41,18 @@ namespace CoinMillionsServer.Wrapper
             return BaseConnector.RequestServer(MethodName.getblock, hash)["result"].ToObject<Block>();
         }
 
+        /// <summary>
+        /// Returns information about the block with the given hash.
+        /// 
+        /// example. getblock <hash>
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <returns></returns>
+        public JObject GetBlockObject(string hash)
+        {
+            return BaseConnector.RequestServer(MethodName.getblock, hash)["result"].ToObject<JObject>();
+        }
+
         //public string GetRawTransaction(string txid)
         //{
         //    return BaseConnector.RequestServer(MethodName.getrawtransaction, txid)["result"].ToString();
