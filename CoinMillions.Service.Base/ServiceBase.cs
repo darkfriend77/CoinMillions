@@ -28,22 +28,29 @@ namespace CoinMillions.Service.Base
         private const string JackpotAccount = "Jackpot";
 
         /// <summary> The bet address. </summary>
-        private const string BetAddress = "mz7dc4UqEmmekLuDQcb6PCngFLHKhYAsQ4";
+        private const string BetAddress = "mxtZKbWUwK8DrqymEVhfT89GyY4eL2fV7F";
         /// <summary> The pot address. </summary>
-        private const string PotAddress = "mo6xVdPofLjr516WdQp3UQp94fpFp6sLLf";
+        private const string PotAddress = "mxqiQDpqDg1Q99uSGtpqU9o6ccVygPQ5VH";
         /// <summary> The own address. </summary>
-        private const string OwnAddress = "n2RGZCWuX8VytneKLwQYxAoQt2nwM8e2rt";
+        private const string OwnAddress = "mvJMWVcdFXaXmpQLn8ipxWzjAZEfzcPU9U";
         /// <summary> The jackpot address. </summary>
-        private const string JackpotAddress = "mnLjgQTZEnJ9STCCGFd2u3G96dahrHS6SC";
+        private const string JackpotAddress = "mmeHTcKxw6FSkURcB3zfZHrQtZB1ymzebC";
 
         /// <summary> The house fee. </summary>
-        private const decimal HouseFee = 0.005M;
+        private const decimal HouseFee = 0.05M;
         /// <summary> The network fee. </summary>
         private const decimal NetworkFee = 0.0001M;
         /// <summary> The dust amount. </summary>
         private const decimal DustAmount = 0.00005430M;
         /// <summary> The block spaceing. </summary>
-        private const int BlockSpaceing = 10;
+        private const int BlockSpaceing = 50;
+
+        ///// <summary> Block spacing draw event 0 -> Off </summary>
+        //private const int BlockSpaceingToDraw = 10;
+        ///// <summary> Pot amount draw event 0 -> Off </summary>
+        //private const int PotAmountToDraw = 0;
+        ///// <summary> Time past to draw event 0 -> Off </summary>
+        //private const int TimePastToDraw = 0;
 
         /// <summary> The log. </summary>
         private ILog m_Log = LogManager.GetLogger(typeof(ServiceBase));
@@ -63,25 +70,44 @@ namespace CoinMillions.Service.Base
             m_Client.NewBlockFound += NewBlockFound;
         }
 
+        /// <summary> Prevents a default instance of the ServiceBase class from being created. </summary>
+        /// <remarks> superreeen, 09.11.2013. </remarks>
+        private ServiceBase()
+        {
+        }
+
         /// <summary> Creates a new block found. </summary>
         /// <remarks> superreeen, 10.11.2013. </remarks>
         /// <param name="sender"> Source of the event. </param>
         /// <param name="e"> Event information. </param>
         private void NewBlockFound(object sender, EventArgs e)
         {
-            var blockCount = m_Client.GetBlockCount();
+            // process bets from the foun block
             ProcessBets();
+            ProcessDraw();
 
-            if (blockCount % BlockSpaceing == 0)
-                ProcessDraw();
+            // check if a draw event is triggered
+            //if (TriggerDraw())
+            //    ProcessDraw();
         }
 
-        /// <summary> Prevents a default instance of the ServiceBase class from being created. </summary>
-        /// <remarks> superreeen, 09.11.2013. </remarks>
-        private ServiceBase()
-        {
+        /// <summary> Check if a draw event is triggered </summary>
+        /// <remarks> darkfriend, 14.11.2013. </remarks>
+        /// <returns> Returns true if a draw event has to be processed. </returns>
+        //private bool TriggerDraw()
+        //{
+        //    var blockCount = m_Client.GetBlockCount();
+        //    if (BlockSpaceingToDraw > 0 && blockCount % BlockSpaceingToDraw == 0)
+        //        return true;
 
-        }
+        //    if (PotAmountToDraw > 0)
+        //        throw new NotImplementedException("Draw event pot amount not implemented.");
+
+        //    if (TimePastToDraw > 0)
+        //        throw new NotImplementedException("Draw event time past not implemented.");
+
+        //    return false;
+        //}
 
         /// <summary> Applies the fee. </summary>
         /// <remarks> superreeen, 10.11.2013. </remarks>
@@ -127,7 +153,7 @@ namespace CoinMillions.Service.Base
                     decimal bet = 0.01M;
                     decimal house = bet * HouseFee;
                     decimal pot = bet - house;
-                    decimal change = input - bet;
+                    decimal change = input - bet - NetworkFee;
 
                     var transin = raw.Vin.SelectMany(o => m_Client.QueryRawTransaction(o.TxId).Vout.Where(v => v.N == o.Vout));
                     string source = transin.OrderByDescending(v => v.Value).SelectMany(v => v.ScriptPubKey.Addresses).First();
@@ -169,26 +195,33 @@ namespace CoinMillions.Service.Base
             if (m_Disposed)
                 throw new ObjectDisposedException("Object already disposed.");
 
-            m_Log.Info("Starting Processing of Bets.");
-            List<UnspentInput> inputs = m_Client.ListUnspent().Where(u => u.Address.Equals(BetAddress)).ToList();
-            while (inputs.Count > 0)
+            try
             {
-                m_Log.InfoFormat("Got {0} unspent inputs.", inputs.Count);
-                inputs = inputs.Take(50).ToList();
-                Dictionary<string, decimal> outputs = GetBetValidationOutput(inputs);
-
-                List<RawTarget> targets = GetTargets(outputs);
-
-                if (targets.Count > 0)
+                m_Log.Info("Starting Processing of Bets.");
+                List<UnspentInput> inputs = m_Client.ListUnspent().Where(u => u.Address.Equals(BetAddress)).ToList();
+                while (inputs.Count > 0)
                 {
-                    var rawTrans = m_Client.CreateRawTransaction(inputs, targets);
-                    var signedRawTrans = m_Client.SignRawTransaction(rawTrans);
-                    var sentRawTrans = m_Client.SendRawTransaction(signedRawTrans.Hex);
-                    m_Log.InfoFormat("Send transaction with TxId {0}.", sentRawTrans);
+                    m_Log.InfoFormat("Got {0} unspent inputs.", inputs.Count);
+                    inputs = inputs.Take(20).ToList();
+                    Dictionary<string, decimal> outputs = GetBetValidationOutput(inputs);
+
+                    List<RawTarget> targets = GetTargets(outputs);
+
+                    if (targets.Count > 0 && inputs.Count > 0)
+                    {
+                        var rawTrans = m_Client.CreateRawTransaction(inputs, targets);
+                        var signedRawTrans = m_Client.SignRawTransaction(rawTrans);
+                        var sentRawTrans = m_Client.SendRawTransaction(signedRawTrans.Hex);
+                        m_Log.InfoFormat("Send transaction with TxId {0}.", sentRawTrans);
+                    }
+                    inputs = m_Client.ListUnspent().Where(u => u.Address.Equals(BetAddress)).ToList();
                 }
-                inputs = m_Client.ListUnspent().Where(u => u.Address.Equals(BetAddress)).ToList();
+                m_Log.Info("Finished Processing of Bets.");
             }
-            m_Log.Info("Finished Processing of Bets.");
+            catch (Exception ex)
+            {
+                m_Log.Error("An error occured while processing Bets, retry next block.", ex);
+            }
         }
 
         /// <summary> Gets the jackpot. </summary>
@@ -215,57 +248,86 @@ namespace CoinMillions.Service.Base
             if (m_Disposed)
                 throw new ObjectDisposedException("Object already disposed.");
 
-            m_Log.Info("Starting Processing of a Draw.");
-            List<UnspentInput> inputs = m_Client.ListUnspent().Where(u => u.Address.Equals(PotAddress)).ToList();
-            List<UnspentInput> jinputs = m_Client.ListUnspent().Where(u => u.Address.Equals(JackpotAddress)).ToList();
-
-            var tickets = Ticket.FromInputs(m_Client, BetAddress, inputs);
-            ulong blockHeight = m_Client.GetBlockCount();
-            int[] drawnNumbers = Ticket.TicketFromHash(m_Client.GetBlock(m_Client.GetBlockHash(blockHeight)).MerkleRoot);
-            m_Log.InfoFormat("Lucky Number for Block {0}: {1}.", blockHeight, String.Join(",", new List<int>(drawnNumbers).ConvertAll(i => i.ToString()).ToArray()));
-            
-            foreach (var item in tickets)
+            try
             {
-                item.UpdateLot(drawnNumbers);
-            }
-            var pot = Jackpot;
-            var winningGroup = tickets.GroupBy(i => i.Lot).OrderByDescending(g => g.Key.Gain);
+                ulong currentBlockHeight = m_Client.GetBlockCount();
+                ulong blockHeight = (currentBlockHeight / BlockSpaceing) * BlockSpaceing;
 
-            Dictionary<string, decimal> payouts = new Dictionary<string, decimal>();
-            foreach (var group in winningGroup)
-            {
-                if (group.Key.Gain > 0M)
+                List<UnspentInput> rawInputs = m_Client.ListUnspent().ToList().Where(i => currentBlockHeight - i.Confirmations < blockHeight).ToList();
+                List<UnspentInput> inputs = rawInputs.Where(u => u.Address.Equals(PotAddress)).ToList();
+                List<UnspentInput> jinputs = rawInputs.Where(u => u.Address.Equals(JackpotAddress)).ToList();
+
+                var tickets = Ticket.FromInputs(m_Client, BetAddress, inputs);
+
+                if (tickets.Count > 0)
                 {
-                    var lotPot = pot * group.Key.Gain;
-                    var amountPerTicket = lotPot / group.LongCount();
-                    m_Log.InfoFormat("Lot {0} has a pot of {1} for {2} makes {3} per winner.", group.Key, lotPot, group.LongCount(), amountPerTicket);
-                    foreach (var ticket in group)
+                    m_Log.Info("Starting Processing of a Draw.");
+
+                    int[] drawnNumbers = Ticket.TicketFromHash(m_Client.GetBlock(m_Client.GetBlockHash(blockHeight)).MerkleRoot);
+                    m_Log.InfoFormat("Lucky Number for Block {0}: {1}.", blockHeight, String.Join(",", new List<int>(drawnNumbers).ConvertAll(i => i.ToString()).ToArray()));
+
+                    foreach (var item in tickets)
                     {
-                        payouts.AddOrUpdate(ticket.Source, v => v + amountPerTicket);
+                        item.UpdateLot(drawnNumbers);
                     }
+                    var pot = Jackpot;
+                    var winningGroup = tickets.GroupBy(i => i.Lot).OrderByDescending(g => g.Key.Gain);
+
+                    Dictionary<string, decimal> payouts = new Dictionary<string, decimal>();
+                    foreach (var group in winningGroup)
+                    {
+                        if (group.Key.Gain > 0M)
+                        {
+                            var lotPot = pot * group.Key.Gain;
+                            var amountPerTicket = lotPot / group.LongCount();
+                            m_Log.InfoFormat("Lot {0} has a pot of {1} for {2} makes {3} per winner.", group.Key, lotPot, group.LongCount(), amountPerTicket);
+                            foreach (var ticket in group)
+                            {
+                                payouts.AddOrUpdate(ticket.Source, v => v + amountPerTicket);
+                            }
+                        }
+                    }
+                    m_Log.InfoFormat("Removeing winning dust below {0}, sorry guys.", DustAmount);
+                    payouts = payouts.Where(p => p.Value > DustAmount).ToDictionary(p => p.Key, p => p.Value);
+
+                    decimal winnings = payouts.Sum(p => p.Value);
+
+                    List<UnspentInput> realinputs;
+                    if (inputs.Sum(i => i.Amount) > winnings)
+                    {
+                        pot = inputs.Sum(i => i.Amount);
+                        decimal move = pot - winnings;
+                        m_Log.InfoFormat("Total payout amount {0}, move to Jackpot {1}.", winnings, move);
+                        payouts.AddOrUpdate(JackpotAddress, v => v + move);
+                        realinputs = inputs;
+                    }
+                    else
+                    {
+                        decimal move = pot - winnings;
+                        m_Log.InfoFormat("Total payout amount {0}, move to Jackpot {1}.", winnings, move);
+                        payouts.AddOrUpdate(JackpotAddress, v => v + move);
+                        realinputs = inputs.Union(jinputs).ToList();
+                    }
+
+                    ApplyFee(JackpotAddress, realinputs, payouts);
+
+                    var targets = GetTargets(payouts);
+
+                    if (targets.Count > 0 && realinputs.Count > 0)
+                    {
+                        var rawTrans = m_Client.CreateRawTransaction(realinputs, targets);
+                        var signedRawTrans = m_Client.SignRawTransaction(rawTrans);
+                        var sentRawTrans = m_Client.SendRawTransaction(signedRawTrans.Hex);
+                        m_Log.InfoFormat("Send transaction with TxId {0}.", sentRawTrans);
+                    }
+
+                    m_Log.Info("Finished Processing of a Draw.");
                 }
             }
-            m_Log.InfoFormat("Removeing winning dust below {0}, sorry guys.", DustAmount);
-            payouts = payouts.Where(p => p.Value > DustAmount).ToDictionary(p => p.Key, p => p.Value);
-            decimal winnings = payouts.Sum(p => p.Value);
-            decimal move = pot - winnings;
-            m_Log.InfoFormat("Total payout amount {0}, move to Jackpot {1}.", winnings, move);
-            payouts.AddOrUpdate(JackpotAddress, v => v + move);
-
-            var realinputs = inputs.Union(jinputs).ToList();
-
-            ApplyFee(JackpotAddress, realinputs, payouts);
-
-            var targets = GetTargets(payouts);
-
-            if (targets.Count > 0 && realinputs.Count > 0)
+            catch (Exception ex)
             {
-                var rawTrans = m_Client.CreateRawTransaction(realinputs, targets);
-                var signedRawTrans = m_Client.SignRawTransaction(rawTrans);
-                var sentRawTrans = m_Client.SendRawTransaction(signedRawTrans.Hex);
-                m_Log.InfoFormat("Send transaction with TxId {0}.", sentRawTrans);
+                m_Log.Error("Error processing Draw, retrying next block.", ex);
             }
-            m_Log.Info("Finished Processing of a Draw.");
         }
 
         #region IDisposable Implementation
