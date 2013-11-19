@@ -25,8 +25,6 @@ namespace CoinMillions
             BitcoinQtConnector btc = new BitcoinQtConnector();
 
 
-            Console.WriteLine(btc.GetTransactionString("04ab47bf1759321089718f96d4f7fd5cf26ba546c9cc45cf201af30ffb59dde6"));
-
 
             //Console.WriteLine("GetInfo: {0}", btc.GetInfo());
             //Console.WriteLine("ListReceivedByAddress: {0}", btc.ListReceivedByAddress());
@@ -174,11 +172,12 @@ namespace CoinMillions
 
 
 
-
-
-            //Console.WriteLine(btc.SendToAddress("muJusbBPg8pkuoDzjhCDzjPxGEaNafiWXY", 0.01699976f));
-
-
+            Random random = new Random();
+            for (int i = 0; i < 1000; i++)
+            {
+                float amount = (float)(0.02 - random.NextDouble() / 200);
+                Console.WriteLine(btc.SendToAddress("mz7dc4UqEmmekLuDQcb6PCngFLHKhYAsQ4", random.NextDouble() > 0.3?amount:0.0102f));
+            }
 
 
 
