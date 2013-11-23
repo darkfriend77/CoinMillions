@@ -12,6 +12,8 @@ namespace CoinMillions.Service.Base
     using CoinMillions.BitcoinClient;
     using CoinMillions.BitcoinClient.Data;
     using log4net;
+    using System.Configuration;
+    using System.Globalization;
 
     /// <summary> A service base. </summary>
     /// <remarks> superreeen, 10.11.2013. </remarks>
@@ -28,22 +30,22 @@ namespace CoinMillions.Service.Base
         private const string JackpotAccount = "Jackpot";
 
         /// <summary> The bet address. </summary>
-        private const string BetAddress = "mxtZKbWUwK8DrqymEVhfT89GyY4eL2fV7F";
+        private readonly string BetAddress = "";
         /// <summary> The pot address. </summary>
-        private const string PotAddress = "mxqiQDpqDg1Q99uSGtpqU9o6ccVygPQ5VH";
+        private readonly string PotAddress = "";
         /// <summary> The own address. </summary>
-        private const string OwnAddress = "mvJMWVcdFXaXmpQLn8ipxWzjAZEfzcPU9U";
+        private readonly string OwnAddress = "";
         /// <summary> The jackpot address. </summary>
-        private const string JackpotAddress = "mmeHTcKxw6FSkURcB3zfZHrQtZB1ymzebC";
+        private readonly string JackpotAddress = "";
 
         /// <summary> The house fee. </summary>
-        private const decimal HouseFee = 0.05M;
+        private readonly decimal HouseFee = 0.05M;
         /// <summary> The network fee. </summary>
-        private const decimal NetworkFee = 0.0001M;
+        private readonly decimal NetworkFee = 0.0001M;
         /// <summary> The dust amount. </summary>
-        private const decimal DustAmount = 0.00005430M;
+        private readonly decimal DustAmount = 0.00005430M;
         /// <summary> The block spaceing. </summary>
-        private const int BlockSpaceing = 50;
+        private readonly ulong BlockSpaceing = 50;
 
         ///// <summary> Block spacing draw event 0 -> Off </summary>
         //private const int BlockSpaceingToDraw = 10;
@@ -68,6 +70,14 @@ namespace CoinMillions.Service.Base
         {
             m_Client = new BitcoinClient(host, user, password);
             m_Client.NewBlockFound += NewBlockFound;
+            BetAddress = ConfigurationManager.AppSettings["BetAddress"];
+            PotAddress = ConfigurationManager.AppSettings["PotAddress"];
+            OwnAddress = ConfigurationManager.AppSettings["OwnAddress"];
+            JackpotAddress = ConfigurationManager.AppSettings["JackpotAddress"];
+            HouseFee = Decimal.Parse(ConfigurationManager.AppSettings["HouseFee"], CultureInfo.InvariantCulture);
+            NetworkFee = Decimal.Parse(ConfigurationManager.AppSettings["NetworkFee"], CultureInfo.InvariantCulture);
+            DustAmount = Decimal.Parse(ConfigurationManager.AppSettings["DustAmount"], CultureInfo.InvariantCulture);
+            BlockSpaceing = ulong.Parse(ConfigurationManager.AppSettings["BlockSpaceing"], CultureInfo.InvariantCulture);
         }
 
         /// <summary> Prevents a default instance of the ServiceBase class from being created. </summary>
@@ -152,8 +162,9 @@ namespace CoinMillions.Service.Base
 
                     decimal bet = 0.01M;
                     decimal house = bet * HouseFee;
-                    decimal pot = bet - house;
+                    //decimal pot = bet - house;
                     decimal change = input - bet - NetworkFee;
+                    decimal pot = input - change - house;
 
                     var transin = raw.Vin.SelectMany(o => m_Client.QueryRawTransaction(o.TxId).Vout.Where(v => v.N == o.Vout));
                     string source = transin.OrderByDescending(v => v.Value).SelectMany(v => v.ScriptPubKey.Addresses).First();

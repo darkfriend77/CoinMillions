@@ -7,11 +7,15 @@
     using System.Text;
     using System.Threading.Tasks;
     using Console = System.Console;
+    using System.Configuration;
     class Program
     {
         static void Main(string[] args)
         {
-            using (ServiceBase service = new ServiceBase(new Uri("http://127.0.0.1:18332/"), "testnet", "key"))
+            string serviceUri = ConfigurationManager.AppSettings["ServiceUri"];
+            string serviceUser = ConfigurationManager.AppSettings["ServiceUser"];
+            string servicePass = ConfigurationManager.AppSettings["ServicePass"];
+            using (ServiceBase service = new ServiceBase(new Uri(serviceUri), serviceUser, servicePass))
             {
                 Console.ReadLine();
             }
