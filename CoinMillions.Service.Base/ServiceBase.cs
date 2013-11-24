@@ -28,6 +28,8 @@ namespace CoinMillions.Service.Base
         private const string OwnAccount = "Own";
         /// <summary> The jackpot account. </summary>
         private const string JackpotAccount = "Jackpot";
+        /// <summary> The temporary account. </summary>
+        private const string TempAccount = "Temppot";
 
         /// <summary> The bet address. </summary>
         private readonly string BetAddress = "";
@@ -37,6 +39,8 @@ namespace CoinMillions.Service.Base
         private readonly string OwnAddress = "";
         /// <summary> The jackpot address. </summary>
         private readonly string JackpotAddress = "";
+        /// <summary> The temporary address. </summary>
+        private readonly string TempAddress = "";
 
         /// <summary> The house fee. </summary>
         private readonly decimal HouseFee = 0.05M;
@@ -74,6 +78,7 @@ namespace CoinMillions.Service.Base
             PotAddress = ConfigurationManager.AppSettings["PotAddress"];
             OwnAddress = ConfigurationManager.AppSettings["OwnAddress"];
             JackpotAddress = ConfigurationManager.AppSettings["JackpotAddress"];
+            TempAddress = ConfigurationManager.AppSettings["TempAddress"];
             HouseFee = Decimal.Parse(ConfigurationManager.AppSettings["HouseFee"], CultureInfo.InvariantCulture);
             NetworkFee = Decimal.Parse(ConfigurationManager.AppSettings["NetworkFee"], CultureInfo.InvariantCulture);
             DustAmount = Decimal.Parse(ConfigurationManager.AppSettings["DustAmount"], CultureInfo.InvariantCulture);
@@ -161,16 +166,16 @@ namespace CoinMillions.Service.Base
                     m_Log.InfoFormat("Calculateing values for {0}.", trans.TxId);
 
                     decimal bet = 0.01M;
-                    decimal house = bet * HouseFee;
+                    //decimal house = bet * HouseFee;
                     //decimal pot = bet - house;
                     decimal change = input - bet - NetworkFee;
-                    decimal pot = input - change - house;
+                    decimal pot = input - change;// -house;
 
                     var transin = raw.Vin.SelectMany(o => m_Client.QueryRawTransaction(o.TxId).Vout.Where(v => v.N == o.Vout));
                     string source = transin.OrderByDescending(v => v.Value).SelectMany(v => v.ScriptPubKey.Addresses).First();
 
-                    m_Log.InfoFormat("Distributing bet {0} to {1}(Pot): {2}, {3}(Own): {4}, {5}(Source): {6}.", trans.TxId, PotAddress, pot, OwnAddress, house, source, change);
-                    outputs.AddOrUpdate(OwnAddress, v => v + house);
+                    m_Log.InfoFormat("Distributing bet {0} to {1}(Pot): {2}, {3}(Source): {4}.", trans.TxId, PotAddress, pot, source, change);
+                    //outputs.AddOrUpdate(OwnAddress, v => v + house);
                     outputs.AddOrUpdate(PotAddress, v => v + pot);
                     outputs.AddOrUpdate(source, v => v + change);
                 }
@@ -213,7 +218,7 @@ namespace CoinMillions.Service.Base
                 while (inputs.Count > 0)
                 {
                     m_Log.InfoFormat("Got {0} unspent inputs.", inputs.Count);
-                    inputs = inputs.Take(20).ToList();
+                    inputs = inputs.Take(50).ToList();
                     Dictionary<string, decimal> outputs = GetBetValidationOutput(inputs);
 
                     List<RawTarget> targets = GetTargets(outputs);
@@ -251,6 +256,125 @@ namespace CoinMillions.Service.Base
             }
         }
 
+        /// <summary> Gets the payouts. </summary>
+        /// <remarks> superreeen, 23.11.2013. </remarks>
+        /// <param name="tickets"> The tickets. </param>
+        /// <param name="drawnNumbers"> The drawn numbers. </param>
+        /// <param name="pot"> The pot. </param>
+        /// <returns> The payouts. </returns>
+        private Dictionary<string, decimal> GetPayouts(List<Ticket> tickets, int[] drawnNumbers, decimal pot)
+        {
+            foreach (var item in tickets)
+            {
+                item.UpdateLot(drawnNumbers);
+            }
+
+            var winningGroup = tickets.GroupBy(i => i.Lot).OrderByDescending(g => g.Key.Gain);
+
+            Dictionary<string, decimal> payouts = new Dictionary<string, decimal>();
+            foreach (var group in winningGroup)
+            {
+                if (group.Key.Gain > 0M)
+                {
+                    var lotPot = pot * group.Key.Gain;
+                    var amountPerTicket = lotPot / group.LongCount();
+                    m_Log.InfoFormat("Lot {0} has a pot of {1} for {2} makes {3} per winner.", group.Key, lotPot, group.LongCount(), amountPerTicket);
+                    foreach (var ticket in group)
+                    {
+                        payouts.AddOrUpdate(ticket.Source, v => v + amountPerTicket);
+                    }
+                }
+            }
+            m_Log.InfoFormat("Removeing winning dust below {0}, sorry guys.", DustAmount);
+            payouts = payouts.Where(p => p.Value > DustAmount).ToDictionary(p => p.Key, p => p.Value);
+            return payouts;
+        }
+
+        /// <summary> Merge inputs. </summary>
+        /// <remarks> superreeen, 23.11.2013. </remarks>
+        /// <param name="inputs"> The inputs. </param>
+        /// <returns> An UnspentInput. </returns>
+        private UnspentInput MergeInputs(List<UnspentInput> inputs)
+        {
+            var currentInputs = inputs.Take(50).ToList();
+            while (currentInputs.Count > 0)
+            {
+                decimal amount = currentInputs.Sum(i => i.Amount);
+                decimal house = amount * HouseFee;
+                decimal pot = amount - house;
+                m_Log.InfoFormat("Merging inputs {0}(Temp): {1} {2}(House): {3}", TempAddress, pot, OwnAddress, house);
+                Dictionary<string, decimal> payouts = new Dictionary<string, decimal>();
+                payouts.Add(TempAddress, pot);
+                payouts.Add(OwnAddress, house);
+                ApplyFee(TempAddress, currentInputs, payouts);
+                var targets = GetTargets(payouts);
+                if (targets.Count > 0 && currentInputs.Count > 0)
+                {
+                    var rawTrans = m_Client.CreateRawTransaction(currentInputs, targets);
+                    var signedRawTrans = m_Client.SignRawTransaction(rawTrans);
+                    var sentRawTrans = m_Client.SendRawTransaction(signedRawTrans.Hex);
+                    m_Log.InfoFormat("Send merge transaction with TxId {0}.", sentRawTrans);
+                }
+                foreach (var item in currentInputs)
+                {
+                    inputs.Remove(item);
+                }
+                currentInputs = inputs.Take(50).ToList();
+            }
+            var unspent = m_Client.ListUnspent(0).Where(u => u.Address.Equals(TempAddress)).ToList();
+            if (unspent.Count > 1)
+                return MergeInputs(unspent);
+            else
+                return unspent[0];
+        }
+
+        /// <summary> Payout winners and move remainder to jackpot. </summary>
+        /// <remarks> superreeen, 23.11.2013. </remarks>
+        /// <param name="input"> The input. </param>
+        /// <param name="payouts"> The payouts. </param>
+        private void PayoutWinnersAndMoveRemainderToJackpot(UnspentInput input, Dictionary<string, decimal> payouts)
+        {
+            var currentPayouts = payouts.Take(50).ToDictionary(p => p.Key, p => p.Value);
+            var currentInputs = new List<UnspentInput>() { input };
+            while (currentPayouts.Count > 0)
+            {
+                var remainder = currentInputs.Sum(i => i.Amount) - currentPayouts.Sum(p => p.Value);
+                foreach (var item in currentPayouts.Keys)
+                {
+                    payouts.Remove(item);
+                }
+
+                currentPayouts.Add(TempAddress, remainder);
+
+                ApplyFee(TempAddress, currentInputs, currentPayouts);
+
+                var targets = GetTargets(currentPayouts);
+
+                if (targets.Count > 0 && currentInputs.Count > 0)
+                {
+                    var rawTrans = m_Client.CreateRawTransaction(currentInputs, targets);
+                    var signedRawTrans = m_Client.SignRawTransaction(rawTrans);
+                    var sentRawTrans = m_Client.SendRawTransaction(signedRawTrans.Hex);
+                    m_Log.InfoFormat("Send payout transaction with TxId {0}.", sentRawTrans);
+                }
+                currentInputs = m_Client.ListUnspent(0).Where(u => u.Address.Equals(TempAddress)).ToList();
+                currentPayouts = payouts.Take(50).ToDictionary(p => p.Key, p => p.Value);
+            }
+
+            currentPayouts = new Dictionary<string, decimal>();
+            currentPayouts.Add(JackpotAddress, currentInputs.Sum(i => i.Amount));
+            ApplyFee(JackpotAddress, currentInputs, currentPayouts);
+            var tars = GetTargets(payouts);
+
+            if (tars.Count > 0 && currentInputs.Count > 0)
+            {
+                var rawTrans = m_Client.CreateRawTransaction(currentInputs, tars);
+                var signedRawTrans = m_Client.SignRawTransaction(rawTrans);
+                var sentRawTrans = m_Client.SendRawTransaction(signedRawTrans.Hex);
+                m_Log.InfoFormat("Send jackpot transaction with TxId {0}.", sentRawTrans);
+            }
+        }
+
         /// <summary> Process the draw. </summary>
         /// <remarks> superreeen, 10.11.2013. </remarks>
         /// <exception cref="ObjectDisposedException"> Thrown when a supplied object has been disposed. </exception>
@@ -277,61 +401,14 @@ namespace CoinMillions.Service.Base
                     int[] drawnNumbers = Ticket.TicketFromHash(m_Client.GetBlock(m_Client.GetBlockHash(blockHeight)).MerkleRoot);
                     m_Log.InfoFormat("Lucky Number for Block {0}: {1}.", blockHeight, String.Join(",", new List<int>(drawnNumbers).ConvertAll(i => i.ToString()).ToArray()));
 
-                    foreach (var item in tickets)
-                    {
-                        item.UpdateLot(drawnNumbers);
-                    }
                     var pot = Jackpot;
-                    var winningGroup = tickets.GroupBy(i => i.Lot).OrderByDescending(g => g.Key.Gain);
 
-                    Dictionary<string, decimal> payouts = new Dictionary<string, decimal>();
-                    foreach (var group in winningGroup)
-                    {
-                        if (group.Key.Gain > 0M)
-                        {
-                            var lotPot = pot * group.Key.Gain;
-                            var amountPerTicket = lotPot / group.LongCount();
-                            m_Log.InfoFormat("Lot {0} has a pot of {1} for {2} makes {3} per winner.", group.Key, lotPot, group.LongCount(), amountPerTicket);
-                            foreach (var ticket in group)
-                            {
-                                payouts.AddOrUpdate(ticket.Source, v => v + amountPerTicket);
-                            }
-                        }
-                    }
-                    m_Log.InfoFormat("Removeing winning dust below {0}, sorry guys.", DustAmount);
-                    payouts = payouts.Where(p => p.Value > DustAmount).ToDictionary(p => p.Key, p => p.Value);
-
+                    Dictionary<string, decimal> payouts = GetPayouts(tickets, drawnNumbers, pot);
                     decimal winnings = payouts.Sum(p => p.Value);
 
-                    List<UnspentInput> realinputs;
-                    if (inputs.Sum(i => i.Amount) > winnings)
-                    {
-                        pot = inputs.Sum(i => i.Amount);
-                        decimal move = pot - winnings;
-                        m_Log.InfoFormat("Total payout amount {0}, move to Jackpot {1}.", winnings, move);
-                        payouts.AddOrUpdate(JackpotAddress, v => v + move);
-                        realinputs = inputs;
-                    }
-                    else
-                    {
-                        decimal move = pot - winnings;
-                        m_Log.InfoFormat("Total payout amount {0}, move to Jackpot {1}.", winnings, move);
-                        payouts.AddOrUpdate(JackpotAddress, v => v + move);
-                        realinputs = inputs.Union(jinputs).ToList();
-                    }
-
-                    ApplyFee(JackpotAddress, realinputs, payouts);
-
-                    var targets = GetTargets(payouts);
-
-                    if (targets.Count > 0 && realinputs.Count > 0)
-                    {
-                        var rawTrans = m_Client.CreateRawTransaction(realinputs, targets);
-                        var signedRawTrans = m_Client.SignRawTransaction(rawTrans);
-                        var sentRawTrans = m_Client.SendRawTransaction(signedRawTrans.Hex);
-                        m_Log.InfoFormat("Send transaction with TxId {0}.", sentRawTrans);
-                    }
-
+                    UnspentInput tempInput = MergeInputs(inputs.Union(jinputs).ToList());
+                    PayoutWinnersAndMoveRemainderToJackpot(tempInput, payouts);
+                                        
                     m_Log.Info("Finished Processing of a Draw.");
                 }
             }
