@@ -181,11 +181,11 @@ using System.Threading;
         /// <remarks> superreeen, 09.11.2013. </remarks>
         /// <exception cref="ObjectDisposedException"> Thrown when a supplied object has been disposed. </exception>
         /// <returns> A List&lt;UnspentInput&gt; </returns>
-        public List<UnspentInput> ListUnspent()
+        public List<UnspentInput> ListUnspent(int confirmations = 1)
         {
             if (m_Disposed)
                 throw new ObjectDisposedException("Object already disposed.");
-            return QueryServer(MethodName.ListUnspent)["result"].ToObject<List<UnspentInput>>();
+            return QueryServer(MethodName.ListUnspent, confirmations)["result"].ToObject<List<UnspentInput>>();
         }
 
         /// <summary> List transactions. </summary>
