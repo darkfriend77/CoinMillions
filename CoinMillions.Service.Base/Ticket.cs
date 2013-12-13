@@ -172,7 +172,7 @@ using log4net;
         }
 
         /// <summary> Gets right numbers count. </summary>
-        /// <remarks> superreeen, 09.11.2013. </remarks>
+        /// <remarks> darkfriend, 13.12.2013. </remarks>
         /// <param name="winningNumbers"> The winning numbers. </param>
         /// <param name="currentNumbers"> The current numbers. </param>
         /// <returns> The right numbers count. </returns>
@@ -189,29 +189,73 @@ using log4net;
         /// <summary> Gets possible lots. </summary>
         /// <remarks> superreeen, 09.11.2013. </remarks>
         /// <returns> The possible lots. </returns>
+        //private static List<PossibleLot> GetPossibleLots()
+        //{
+        //    List<PossibleLot> findings = new List<PossibleLot>();
+
+        //    decimal gain = 1;
+        //    decimal raiser = 1;
+        //    decimal totalGain = 0;
+        //    decimal gainStepAllocate = 0;
+        //    decimal gainAllocate = 0;
+
+        //    for (int n = 5; n >= 0; n--)
+        //    {
+        //        gainAllocate = (gain * (n)) / (n + raiser);
+        //        gain -= gainAllocate;
+
+        //        for (int s = 2; s >= 0; s--)
+        //        {
+        //            gainStepAllocate = (gainAllocate * (s + 2)) / (s + raiser + 2);
+        //            gainAllocate -= gainStepAllocate;
+        //            totalGain += gainStepAllocate;
+
+        //            raiser += 2;
+
+        //            findings.Add(new PossibleLot()
+        //            {
+        //                Numbers = n,
+        //                Stars = s,
+        //                Probability = (decimal)(SpecialFunctions.Binomial(Numbers, n)
+        //                            * SpecialFunctions.Binomial(MaxNumbers - Numbers, Numbers - n)
+        //                            / SpecialFunctions.Binomial(MaxNumbers, Numbers)
+        //                            * SpecialFunctions.Binomial(Stars, s)
+        //                            * SpecialFunctions.Binomial(MaxStars - Stars, Stars - s)
+        //                            / SpecialFunctions.Binomial(MaxStars, Stars)),
+        //                Gain = gainStepAllocate
+        //            });
+        //        }
+        //    }
+        //    return findings;
+        //}
         private static List<PossibleLot> GetPossibleLots()
         {
+            // key numbers & stars
+            Dictionary<int, decimal> distribution = new Dictionary<int, decimal>();
+            distribution[52] = 0.300m;
+            distribution[51] = 0.080m;
+            distribution[50] = 0.020m;
+            distribution[42] = 0.020m;
+            distribution[41] = 0.010m;
+            distribution[40] = 0.006m;
+            distribution[32] = 0.006m;
+            distribution[31] = 0.004m;
+            distribution[30] = 0.002m;
+            distribution[22] = 0.002m;
+            distribution[21] = 0.040m;
+            distribution[20] = 0.070m;
+            distribution[12] = 0.090m;
+            distribution[11] = 0.090m;
+            distribution[10] = 0.110m;
+            distribution[02] = 0.000m;
+            distribution[01] = 0.000m;
+            distribution[00] = 0.000m;
+            
             List<PossibleLot> findings = new List<PossibleLot>();
-
-            decimal gain = 1;
-            decimal raiser = 1;
-            decimal totalGain = 0;
-            decimal gainStepAllocate = 0;
-            decimal gainAllocate = 0;
-
             for (int n = 5; n >= 0; n--)
             {
-                gainAllocate = (gain * (n)) / (n + raiser);
-                gain -= gainAllocate;
-
                 for (int s = 2; s >= 0; s--)
                 {
-                    gainStepAllocate = (gainAllocate * (s + 2)) / (s + raiser + 2);
-                    gainAllocate -= gainStepAllocate;
-                    totalGain += gainStepAllocate;
-
-                    raiser += 2;
-
                     findings.Add(new PossibleLot()
                     {
                         Numbers = n,
@@ -222,7 +266,7 @@ using log4net;
                                     * SpecialFunctions.Binomial(Stars, s)
                                     * SpecialFunctions.Binomial(MaxStars - Stars, Stars - s)
                                     / SpecialFunctions.Binomial(MaxStars, Stars)),
-                        Gain = gainStepAllocate
+                        Gain = distribution[(n*10) + s]
                     });
                 }
             }
